@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+#encoding: UTF-8
+
+
+import pygtk
+pygtk.require('2.0')
+import gtk
+
+from MainWin import MainWin
+
+
+def main(args):
+   mw = MainWin()
+   gtk.main()
+
+   return 0
+
+
+if __name__=='__main__':
+   import sys
+   sys.exit(main(sys.argv[1:]))
+
+   
+
