@@ -66,6 +66,10 @@ class MainWin(gtk.Window, ShortkeyMixin):
       
       #-- Shortkeys...
       self.bind_shortkey('C+q', self.onQuit)
+      self.bind_shortkey('M+Up', self.onFlistUp)
+      self.bind_shortkey('M+Home', self.onFlistHome)
+      self.bind_shortkey('C+r', self.onFlistReload)
+      
       
       #-- Set up ui
       F.filelist.setCwdHome()
@@ -85,3 +89,10 @@ class MainWin(gtk.Window, ShortkeyMixin):
       self.onQuit()
       return False
       
+   
+   def onFlistUp(self):
+      F.filelist.setCwdUp()
+   def onFlistHome(self):
+      F.filelist.setCwdHome()
+   def onFlistReload(self):
+      F.filelist.setCwd( F.filelist.getCwd() )

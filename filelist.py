@@ -30,10 +30,8 @@ class FileList(gobject.GObject):
    def loadCwdList(self):
       lst = os.listdir(self.cwd)
       keyfun = lambda e: e[0].lower
-      lst_dirs = sorted( [(fn,True) for fn in lst if self.__f_filter(fn, True)],
-                        key=keyfun )
-      lst_files = sorted( [(fn,False) for fn in lst if self.__f_filter(fn, False)],
-                         key=keyfun )
+      lst_dirs = sorted( [(fn,True) for fn in lst if self.__f_filter(fn, True)] )
+      lst_files = sorted( [(fn,False) for fn in lst if self.__f_filter(fn, False)] )
       self.lst = lst_dirs
       self.lst.extend( lst_files )
 
@@ -67,17 +65,3 @@ gobject.type_register(FileList)
 gobject.signal_new('cwd-changed', FileList, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_STRING,))
 
-
-
-
-
-def test():
-   L = FileList()
-   L.setCwdHome()
-   L.setCwdUp()
-   L.setCwdInto('zod')
-   L.setCwdInto('www')
-   
-   
-if __name__=='__main__':
-   test()

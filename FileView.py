@@ -11,12 +11,15 @@ class FileView(gtk.TreeView):
       
       gtk.TreeView.__init__(self, self.store)
       
+      self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+      #self.set_rubber_banding(True)
+      
       self.set_headers_visible(False)
       self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_NONE)
    
       fname_renderer = gtk.CellRendererText()
-      fname_renderer.set_property('editable', True)
-      fname_renderer.connect('edited', self.onFilenameEdited)
+      #fname_renderer.set_property('editable', True)
+      #fname_renderer.connect('edited', self.onFilenameEdited)
       
       self.col_fname = gtk.TreeViewColumn('Name', fname_renderer, markup=2)
       #self.col_counter = gtk.TreeViewColumn('Count', counter_renderer, markup=2)
@@ -27,18 +30,19 @@ class FileView(gtk.TreeView):
       self.append_column(self.col_fname)
       
       gtk.rc_parse_string( """
-        style "taglist-style"{
+        style "filelist-style"{
             GtkTreeView::odd-row-color = "#ddd"
             GtkTreeView::even-row-color = "#eee"
             GtkTreeView::allow-rules = 1
         }
-        widget "*taglist_view*" style "taglist-style"
+        widget "*filelist_view*" style "filelist-style"
     """)
-      self.set_name("taglist_view" )
+      self.set_name("filelist_view" )
       self.set_rules_hint(True)
       
-      
       #-- model init
+      self.connect('row-activated', self.onRowActivated)
+      
       self.flist = flist
       self.flist.connect('cwd-changed', self.onCwdChanged)
    
@@ -72,3 +76,17 @@ class FileView(gtk.TreeView):
       # if orig_markup != new_markup:
       #    self.store.set_value(tree_iter, 1, new_markup)
       #    self.db.updateTag(tag_id, new_name)
+
+   def onRowActivated(self, view, path, col):
+      model = self.get_model()
+      for p_i in path:
+         m_iter = model.get_iter(p_i)
+         
+         is_dir = model.get_value(m_iter, 0)
+         fname = model.get_value(m_iter, 1)
+         
+         if is_dir:
+            self.flist.setCwdInto(fname)
+         else:
+            pass
+      

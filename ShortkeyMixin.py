@@ -22,10 +22,17 @@ class ShortkeyMixin(object):
 
    def bind_shortkey(self, s, func):
       mod, keyval = s.split('+')
-      keyval = ord(keyval)
+      if keyval=='Up':
+         keyval = 65362
+      elif keyval=='Home':
+         keyval = 65360
+      else:
+         keyval = ord(keyval)
       self.bindings[mod][keyval] = func
 
    def on_keypress(self, widget, data=None):
+      #print data.keyval
+      
       mod = None
       if ctrl_down(data.state) and alt_down(data.state):
          mod = 'CM'
