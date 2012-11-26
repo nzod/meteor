@@ -18,19 +18,22 @@ def obj_load(fname):
 
 
 class Config:
+   default = { "opener_program": "gnome-open", 
+               "pathbar": {
+                  "position": "top"
+               }
+             }
+   
    def __init__(self, fname):
       self.o = {}
       self.fname = os.path.expanduser('~/.%s' % fname)
-      self.loaded = False
       
       if os.path.isfile(self.fname):
          self.o = obj_load(self.fname)
-         self.loaded = True
          if self.o is None:
-            self.o = {}
-            self.loaded = False
+            self.o = Config.default
       else:
-         self.loaded = False  
+         self.o = Config.default
 
    def __getitem__(self, k):
       return self.o[k]
@@ -45,3 +48,4 @@ class Config:
       obj_save(self.o, self.fname)
       
 
+conf = Config('meteor')

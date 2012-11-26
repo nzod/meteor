@@ -8,7 +8,7 @@ pygtk.require('2.0')
 import gtk
 import gobject
 
-from config import Config
+from config import conf
 from filelist import FileList
 from ShortkeyMixin import ShortkeyMixin
 from FileView import FileView
@@ -19,7 +19,6 @@ class F:
    APP_NAME = 'meteor'
    APP_VER = '0.1'
    install_dir = ''
-   conf = None
    filelist = FileList()
    
 
@@ -57,9 +56,8 @@ class MainWin(gtk.Window, ShortkeyMixin):
       self.set_default_size(480, 460)
       self.connect('delete_event', self.delete_event)
       
-      #-- Create and init configuration
+      #-- Create and init config
       F.install_dir = os.path.dirname( os.path.realpath(__file__) )
-      F.conf = Config(F.APP_NAME)
       
       # == == ==  RESOURCES  == == ==
       
@@ -92,7 +90,7 @@ class MainWin(gtk.Window, ShortkeyMixin):
       
       
    def onQuit(self):
-      F.conf.write()
+      conf.write()
       
       gtk.main_quit()
       
