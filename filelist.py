@@ -18,6 +18,9 @@ class FileList(gobject.GObject):
    def getCwd(self):
       return self.cwd
 
+   def getCwdName(self):
+      return os.path.split(self.cwd)[1]
+
    def __f_filter(self, fn, is_dir):
       #reads:  self.cwd, self.use_hidden_files
       if fn.startswith('.') and (not self.use_hidden_files):
@@ -29,7 +32,6 @@ class FileList(gobject.GObject):
 
    def loadCwdList(self):
       lst = os.listdir(self.cwd)
-      keyfun = lambda e: e[0].lower
       lst_dirs = sorted( [(fn,True) for fn in lst if self.__f_filter(fn, True)] )
       lst_files = sorted( [(fn,False) for fn in lst if self.__f_filter(fn, False)] )
       self.lst = lst_dirs

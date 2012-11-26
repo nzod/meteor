@@ -16,6 +16,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
       self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
       #self.set_rubber_banding(True)
+      #self.set_enable_search(True)
       
       self.set_headers_visible(False)
       self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_NONE)
@@ -53,9 +54,16 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
       self.flist = flist
       self.flist.connect('cwd-changed', self.onCwdChanged)
+      self.fhistory = {}
    
    def clear(self):
       self.store.clear()
+      
+   def makeCellVisible(self, i):
+      self.scroll_to_cell(i)
+      #tup = self.get_visible_range()  # always None for some reason...
+      # if i<a+1 or i>b-1:
+      #    self.scroll_to_cell(i)
       
    def fname_markup(self, fname, is_dir):
       desc = ''
@@ -76,7 +84,14 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.loadFileList()
    
    def onNavUp(self):
+      currname = self.flist.getCwdName()
       self.flist.setCwdUp()
+      try:
+         i = self.flist.lst.index((currname,True))
+         self.get_selection().select_path(i)
+         self.makeCellVisible(i)
+      except:
+         pass
       
    def onNavHome(self):
       self.flist.setCwdHome()
@@ -96,14 +111,16 @@ class FileView(gtk.TreeView, ShortkeyMixin):
 
    def onRowActivated(self, view, path, col):
       model = self.get_model()
-      for p_i in path:
-         m_iter = model.get_iter(p_i)
-         
-         is_dir = model.get_value(m_iter, 0)
-         fname = model.get_value(m_iter, 1)
-         
-         if is_dir:
-            self.flist.setCwdInto(fname)
-         else:
-            pass
+      p_i = path[0]
+      m_iter = model.get_iter(p_i)
+      
+      is_dir = model.get_value(m_iter, 0)
+      fname = model.get_value(m_iter, 1)
+      
+      if is_dir:
+         self.flist.setCwdInto(fname)
+         self.get_selection().select_path(0)
+         self.makeCellVisible(0)
+      else:
+         pass
       
