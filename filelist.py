@@ -52,6 +52,7 @@ class FileList(gobject.GObject):
    def setUseHiddenFiles(self, val):
       self.use_hidden_files = val
       self.loadCwdList()
+      self.emit('cwd-changed', self.cwd)
    
    def setCwd(self, pth):
       if not os.path.isdir(pth):

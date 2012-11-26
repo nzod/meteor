@@ -55,6 +55,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.bind_shortkey('M+Up', self.onNavUp)
       self.bind_shortkey('M+Home', self.onNavHome)
       self.bind_shortkey('C+r', self.onNavReload)
+      self.bind_shortkey('C+h', self.onToggleHidden)
       
       #-- model init
       self.connect('row-activated', self.onRowActivated)
@@ -140,3 +141,28 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       else:
          f_ops.execute( self.flist.getItemFullPath(fname) )
       
+      
+   def onToggleHidden(self):
+      sel = self.get_selection()
+      (model, pathlist) = sel.get_selected_rows()
+      selfiles = []
+      for path in pathlist:
+         m_iter = model.get_iter(path)
+         is_dir = model.get_value(m_iter, 0)
+         fname = model.get_value(m_iter, 1)
+         selfiles.append((fname,is_dir))
+       
+      self.flist.setUseHiddenFiles( not self.flist.use_hidden_files )
+      
+      first_sel = None
+      for selfile in selfiles:
+         try:
+            i = self.flist.lst.index(selfile)
+            if first_sel is None:
+               first_sel = i
+            sel.select_path(i)
+         except:
+            pass
+      
+      if first_sel is not None:
+         self.makeCellVisible(first_sel)
