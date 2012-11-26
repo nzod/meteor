@@ -59,6 +59,9 @@ class FileView(gtk.TreeView, ShortkeyMixin):
    def clear(self):
       self.store.clear()
       
+   def getFileList(self):
+      return self.flist
+      
    def makeCellVisible(self, i):
       self.scroll_to_cell(i)
       # a,b = self.get_visible_range()  # always None for some reason...

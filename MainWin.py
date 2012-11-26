@@ -12,6 +12,7 @@ from config import Config
 from filelist import FileList
 from ShortkeyMixin import ShortkeyMixin
 from FileView import FileView
+from PathBar import PathBar
 
 
 class F:
@@ -28,6 +29,23 @@ def confirm(text):
    response = dlg.run()
    dlg.destroy()
    return (response==gtk.RESPONSE_OK)
+
+
+class FileViewGroup(gtk.EventBox):
+   def __init__(self, flist):
+      gtk.EventBox.__init__(self)
+      
+      self.fileview = FileView(flist)
+      fileview_container = gtk.ScrolledWindow()
+      fileview_container.add(self.fileview)
+      fileview_container.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+      
+      self.pathbar = PathBar(self.fileview)
+      
+      box = gtk.VBox()
+      box.pack_start(self.pathbar, expand=False)
+      box.pack_start(fileview_container, expand=True)
+      self.add(box)
 
 
 class MainWin(gtk.Window, ShortkeyMixin):
@@ -49,16 +67,14 @@ class MainWin(gtk.Window, ShortkeyMixin):
       # ....
       
       # == == ==  MAIN WIDGETS  == == ==
-      self.fileview = FileView(F.filelist)
-      fileview_container = gtk.ScrolledWindow()
-      fileview_container.add(self.fileview)
-      fileview_container.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+      fileview_group = FileViewGroup(F.filelist)
+      self.fileview = fileview_group.fileview
       #...
       
       # == == ==  LAYOUT  == == ==
       
       mainbox = gtk.VBox()
-      mainbox.pack_start(fileview_container, expand=True, padding=0)
+      mainbox.pack_start(fileview_group, expand=True, padding=0)
 
       self.add(mainbox)
 
