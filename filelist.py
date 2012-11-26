@@ -1,10 +1,17 @@
 #encoding: UTF-8
 
+import re
 import os
 
 import pygtk
 pygtk.require('2.0')
 import gobject
+
+
+def natural_sort(l): 
+   convert = lambda text: int(text) if text.isdigit() else text.lower() 
+   alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+   return sorted(l, key=alphanum_key)
 
 
 class FileList(gobject.GObject):
@@ -32,8 +39,10 @@ class FileList(gobject.GObject):
 
    def loadCwdList(self):
       lst = os.listdir(self.cwd)
-      lst_dirs = sorted( [(fn,True) for fn in lst if self.__f_filter(fn, True)] )
-      lst_files = sorted( [(fn,False) for fn in lst if self.__f_filter(fn, False)] )
+      lst_dirs = [(thefn,True) for thefn in \
+            natural_sort( [fn for fn in lst if self.__f_filter(fn, True)] ) ]
+      lst_files = [(thefn,False) for thefn in \
+            natural_sort( [fn for fn in lst if self.__f_filter(fn, False)] ) ]
       self.lst = lst_dirs
       self.lst.extend( lst_files )
 
