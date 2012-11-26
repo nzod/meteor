@@ -5,6 +5,7 @@ pygtk.require('2.0')
 import gtk
 
 from ShortkeyMixin import ShortkeyMixin
+import f_ops
 
 
 class FileView(gtk.TreeView, ShortkeyMixin):
@@ -127,5 +128,5 @@ class FileView(gtk.TreeView, ShortkeyMixin):
          self.get_selection().select_path(0)
          self.makeCellVisible(0)
       else:
-         pass
+         f_ops.execute( self.flist.getItemFullPath(fname) )
       
