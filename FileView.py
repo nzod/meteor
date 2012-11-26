@@ -61,7 +61,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
    def makeCellVisible(self, i):
       self.scroll_to_cell(i)
-      #tup = self.get_visible_range()  # always None for some reason...
+      # a,b = self.get_visible_range()  # always None for some reason...
       # if i<a+1 or i>b-1:
       #    self.scroll_to_cell(i)
       
@@ -95,6 +95,8 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
    def onNavHome(self):
       self.flist.setCwdHome()
+      self.get_selection().select_path(0)
+      self.makeCellVisible(0)
       
    def onNavReload(self):
       self.flist.setCwd( self.flist.getCwd() )

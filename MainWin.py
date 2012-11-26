@@ -68,7 +68,7 @@ class MainWin(gtk.Window, ShortkeyMixin):
       self.bind_shortkey('C+q', self.onQuit)
       
       #-- Set up ui
-      F.filelist.setCwdHome()
+      self.fileview.onNavHome()
       
       # == == ==  SHOW THE BABY  == == ==
       
