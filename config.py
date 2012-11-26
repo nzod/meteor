@@ -1,8 +1,20 @@
 #encoding: UTF-8
 
 import os
+import json
 
-import po
+
+def obj_save(obj, fname):
+   with open(fname, 'w') as f:
+      json.dump(obj, f, indent=3)
+
+def obj_load(fname):
+   try:
+      with open(fname, 'r') as f:
+         obj = json.load(f)
+         return obj
+   except (IOError):
+      return None
 
 
 class Config:
@@ -12,7 +24,7 @@ class Config:
       self.loaded = False
       
       if os.path.isfile(self.fname):
-         self.o = po.load(self.fname)
+         self.o = obj_load(self.fname)
          self.loaded = True
          if self.o is None:
             self.o = {}
@@ -30,6 +42,6 @@ class Config:
       return hasattr(self.o, k)
       
    def write(self):
-      po.save(self.o, self.fname)
+      obj_save(self.o, self.fname)
       
 
