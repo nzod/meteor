@@ -17,6 +17,7 @@ from FileView import FileView
 class F:
    APP_NAME = 'meteor'
    APP_VER = '0.1'
+   install_dir = ''
    conf = None
    filelist = FileList()
    
@@ -39,9 +40,8 @@ class MainWin(gtk.Window, ShortkeyMixin):
       self.connect('delete_event', self.delete_event)
       
       #-- Create and init configuration
+      F.install_dir = os.path.dirname( os.path.realpath(__file__) )
       F.conf = Config(F.APP_NAME)
-      if not F.conf.hasKey('install-dir'):
-         F.conf['install-dir'] = os.path.dirname( os.path.realpath(__file__) )
       
       # == == ==  RESOURCES  == == ==
       
