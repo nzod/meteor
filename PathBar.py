@@ -7,8 +7,8 @@ import glib
 
 
 class PathBar(gtk.EventBox):
-   color_default = gtk.gdk.color_parse('#46718A')
-   color_active = gtk.gdk.color_parse('#E7C249')
+   color_default = gtk.gdk.color_parse('#777')
+   color_active = gtk.gdk.color_parse('#46718A')
    color_text = '#fff'
    
    def __init__(self, fview):

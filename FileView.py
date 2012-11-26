@@ -9,7 +9,7 @@ import f_ops
 
 
 class FileView(gtk.TreeView, ShortkeyMixin):
-   def __init__(self, flist):
+   def __init__(self, flist, group):
       self.store = gtk.ListStore(bool, str, str)   # is_dir; original filename; markup
       
       gtk.TreeView.__init__(self, self.store)
@@ -35,14 +35,20 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.append_column(self.col_fname)
       
       gtk.rc_parse_string( """
-        style "filelist-style"{
+        style "filelist-style-active"{
             GtkTreeView::odd-row-color = "#ddd"
             GtkTreeView::even-row-color = "#eee"
             GtkTreeView::allow-rules = 1
         }
-        widget "*filelist_view*" style "filelist-style"
+        style "filelist-style-inactive"{
+            GtkTreeView::odd-row-color = "#bbb"
+            GtkTreeView::even-row-color = "#ccc"
+            GtkTreeView::allow-rules = 1
+        }
+        widget "*filelist_view_active*" style "filelist-style-active"
+        widget "*filelist_view_inactive*" style "filelist-style-inactive"
     """)
-      self.set_name("filelist_view" )
+      self.set_name('filelist_view_inactive')
       self.set_rules_hint(True)
       
       #-- hotkeys
@@ -56,12 +62,16 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.flist = flist
       self.flist.connect('cwd-changed', self.onCwdChanged)
       self.fhistory = {}
+      self.group = group
    
    def clear(self):
       self.store.clear()
       
    def getFileList(self):
       return self.flist
+      
+   def setActive(self, active):
+      self.set_name('filelist_view_%s' % ('active' if active else 'inactive'))
       
    def makeCellVisible(self, i):
       self.scroll_to_cell(i)
