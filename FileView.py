@@ -4,12 +4,15 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 
+from ShortkeyMixin import ShortkeyMixin
 
-class FileView(gtk.TreeView):
+
+class FileView(gtk.TreeView, ShortkeyMixin):
    def __init__(self, flist):
       self.store = gtk.ListStore(bool, str, str)   # is_dir; original filename; markup
       
       gtk.TreeView.__init__(self, self.store)
+      ShortkeyMixin.__init__(self)
       
       self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
       #self.set_rubber_banding(True)
@@ -40,6 +43,11 @@ class FileView(gtk.TreeView):
       self.set_name("filelist_view" )
       self.set_rules_hint(True)
       
+      #-- hotkeys
+      self.bind_shortkey('M+Up', self.onNavUp)
+      self.bind_shortkey('M+Home', self.onNavHome)
+      self.bind_shortkey('C+r', self.onNavReload)
+      
       #-- model init
       self.connect('row-activated', self.onRowActivated)
       
@@ -66,6 +74,15 @@ class FileView(gtk.TreeView):
       
    def onCwdChanged(self, srcobj, cwd):
       self.loadFileList()
+   
+   def onNavUp(self):
+      self.flist.setCwdUp()
+      
+   def onNavHome(self):
+      self.flist.setCwdHome()
+      
+   def onNavReload(self):
+      self.flist.setCwd( self.flist.getCwd() )
    
    def onFilenameEdited(self, cell, path, new_name):
       tree_iter = self.store.get_iter(path)
