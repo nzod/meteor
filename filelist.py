@@ -2,10 +2,10 @@
 
 import re
 import os
-import sys
 
 import pygtk
 pygtk.require('2.0')
+import gtk
 import gobject
 
 import pyinotify
@@ -25,13 +25,14 @@ def natural_sort(l):
    return sorted(l, key=alphanum_key)
 
 
-class FileList(gobject.GObject):
+class FileList(gtk.ListStore):
    def __init__(self):
-      self.__gobject_init__()
+      gtk.ListStore.__init__(self, bool, str, str)  # is_dir, fname, fname_markup
       
       self.use_hidden_files = False
       self.cwd = ''
-      self.lst = []  # [(fname, is_dir), ]
+      
+      self.name_markup_fun = None #assigned later by owner list
       
       self.watch_mgr = pyinotify.WatchManager()
       evt_handler = FsEvtHandler()
@@ -52,6 +53,11 @@ class FileList(gobject.GObject):
    def hasFilename(self, fname):
       return (fname in os.listdir(self.cwd))
 
+   def findItemByFname(self, fname):
+      for i,row in enumerate(self):
+         if row[1]==fname:
+            return i
+
    def __f_filter(self, fn, is_dir):
       #reads:  self.cwd, self.use_hidden_files
       if fn.startswith('.') and (not self.use_hidden_files):
@@ -63,13 +69,15 @@ class FileList(gobject.GObject):
 
    def loadCwdList(self):
       lst = os.listdir(self.cwd)
-      lst_dirs = [(thefn,True) for thefn in \
-            natural_sort( [fn for fn in lst if self.__f_filter(fn, True)] ) ]
-      lst_files = [(thefn,False) for thefn in \
-            natural_sort( [fn for fn in lst if self.__f_filter(fn, False)] ) ]
-      self.lst = lst_dirs
-      self.lst.extend( lst_files )
-
+      lst_dirs = natural_sort( [fn for fn in lst if self.__f_filter(fn, True)] )
+      lst_files = natural_sort( [fn for fn in lst if self.__f_filter(fn, False)] )
+      
+      self.clear()
+      for fname in lst_dirs:
+         self.append(( True, fname, self.fname_markup_fun(fname, True) ))
+      for fname in lst_files:
+         self.append(( False, fname, self.fname_markup_fun(fname, False) ))
+      
    def getItemFullPath(self, fn):
       return os.path.join(self.cwd, fn)
    
@@ -115,13 +123,11 @@ class FileList(gobject.GObject):
       
    def onFileDeleted(self, pth):
       _,fname = os.path.split(pth)
-      
-      for i,item in enumerate(self.lst):
-         if item[0]==fname:
-            del self.lst[i]
+      for row in self:
+         if row[1]==fname:
+            self.remove(row.iter)
             break
-      del self.lst[i]
-      self.emit('file-deleted', fname, i)
+      self.emit('file-deleted', fname)
    
 
 gobject.type_register(FileList)
@@ -130,4 +136,4 @@ gobject.signal_new('cwd-changed', FileList, gobject.SIGNAL_RUN_FIRST,
 gobject.signal_new('file-created', FileList, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_STRING,))
 gobject.signal_new('file-deleted', FileList, gobject.SIGNAL_RUN_FIRST,
-                   gobject.TYPE_NONE, (gobject.TYPE_STRING, gobject.TYPE_INT))
+                   gobject.TYPE_NONE, (gobject.TYPE_STRING,))

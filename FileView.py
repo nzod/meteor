@@ -9,12 +9,21 @@ import f_ops
 from config import conf
 
 
+def fname_markup(fname, is_dir):
+      desc = ''
+      if is_dir:
+         desc += 'bold'
+      desc += ' 10.0'
+      return '<span font_desc="%s" foreground="#333">%s</span>' % (desc, fname)
+      
+
 class FileView(gtk.TreeView, ShortkeyMixin):
    def __init__(self, flist, group):
-      self.store = gtk.ListStore(bool, str, str)   # is_dir; original filename; markup
-      
-      gtk.TreeView.__init__(self, self.store)
+      gtk.TreeView.__init__(self, flist)
       ShortkeyMixin.__init__(self)
+      
+      self.flist = flist
+      self.flist.fname_markup_fun = fname_markup
       
       self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
       #self.set_rubber_banding(True)
@@ -62,16 +71,13 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.bind_shortkey('Return', self.onItemEnter)
       
       #-- model init
-      #self.connect('row-activated', self.onRowActivated)
-      
-      self.flist = flist
       self.flist.connect('cwd-changed', self.onCwdChanged)
-      self.flist.connect('file-deleted', self.onFileDeleted)
-      self.fhistory = {}
       self.group = group
+      
+      #self.connect('row-activated', self.onRowActivated)
    
    def clear(self):
-      self.store.clear()
+      self.flist.clear()
       
    def getFileList(self):
       return self.flist
@@ -84,40 +90,17 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       # a,b = self.get_visible_range()  # always None for some reason...
       # if i<a+1 or i>b-1:
       #    self.scroll_to_cell(i)
-      
-   def fname_markup(self, fname, is_dir):
-      desc = ''
-      if is_dir:
-         desc += 'bold'
-      desc += ' 10.0'
-      return '<span font_desc="%s" foreground="#333">%s</span>' % (desc, fname)
-      
-   def count_markup(self, s):
-      return '<span font_desc="7.0" foreground="#666">%s</span>' % s
-   
-   def loadFileList(self):
-      self.store.clear()
-      for fname, is_dir in self.flist.lst:
-         self.store.append(( is_dir, fname, self.fname_markup(fname, is_dir) ))
-      
+            
    def onCwdChanged(self, srcobj, cwd):
-      self.loadFileList()
-   
-   def onFileDeleted(self, srcobj, fname, i):
-      for row in self.store:
-         if row[1]==fname:
-            self.store.remove(row.iter)
-            break
+      #self.loadFileList()
+      pass
    
    def onNavUp(self):
       currname = self.flist.getCwdName()
       self.flist.setCwdUp()
-      try:
-         i = self.flist.lst.index((currname,True))
-         self.get_selection().select_path(i)
-         self.makeCellVisible(i)
-      except:
-         pass
+      i = self.flist.findItemByFname(currname)
+      self.get_selection().select_path(i)
+      self.makeCellVisible(i)
       
    def onNavHome(self):
       self.flist.setCwdHome()
@@ -136,9 +119,9 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.set_cursor(p_i, self.col_fname, True)
    
    def onRenameCommit(self, cell, path, new_name):
-      tree_iter = self.store.get_iter(path)
-      is_dir = self.store.get_value(tree_iter, 0)
-      orig_fname = self.store.get_value(tree_iter, 1)
+      tree_iter = self.flist.get_iter(path)
+      is_dir = self.flist.get_value(tree_iter, 0)
+      orig_fname = self.flist.get_value(tree_iter, 1)
       
       new_name = new_name.strip()
       if (not new_name) or (new_name==orig_fname):
@@ -147,8 +130,8 @@ class FileView(gtk.TreeView, ShortkeyMixin):
          return
       
       f_ops.rename(self.flist.getCwd(), orig_fname, new_name)
-      self.store.set_value(tree_iter, 1, new_name)
-      self.store.set_value(tree_iter, 2, self.fname_markup(new_name, is_dir))
+      self.flist.set_value(tree_iter, 1, new_name)
+      self.flist.set_value(tree_iter, 2, self.fname_markup(new_name, is_dir))
 
    # def onRowActivated(self, view, path, col):
    #    model = self.get_model()
@@ -189,21 +172,17 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       selfiles = []
       for path in pathlist:
          m_iter = model.get_iter(path)
-         is_dir = model.get_value(m_iter, 0)
          fname = model.get_value(m_iter, 1)
-         selfiles.append((fname,is_dir))
+         selfiles.append(fname)
        
       self.flist.setUseHiddenFiles( not self.flist.use_hidden_files )
       
       first_sel = None
       for selfile in selfiles:
-         try:
-            i = self.flist.lst.index(selfile)
-            if first_sel is None:
-               first_sel = i
-            sel.select_path(i)
-         except:
-            pass
+         i = self.flist.findItemByFname(selfile)
+         if first_sel is None:
+            first_sel = i
+         sel.select_path(i)
       
       if first_sel is not None:
          self.makeCellVisible(first_sel)
