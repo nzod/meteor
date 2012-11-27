@@ -58,9 +58,10 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.bind_shortkey(k_co['fview-nav-home'], self.onNavHome)
       self.bind_shortkey(k_co['fview-reload'], self.onNavReload)
       self.bind_shortkey(k_co['fview-toggle-hidden'], self.onToggleHidden)
+      self.bind_shortkey('Return', self.onItemEnter)
       
       #-- model init
-      self.connect('row-activated', self.onRowActivated)
+      #self.connect('row-activated', self.onRowActivated)
       
       self.flist = flist
       self.flist.connect('cwd-changed', self.onCwdChanged)
@@ -122,15 +123,28 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       tree_iter = self.store.get_iter(path)
       is_dir = self.store.get_value(tree_iter, 0)
       orig_fname = self.store.get_value(tree_iter, 1)
-      
-      # new_markup = self.fname_markup(tag_id, new_name)
-      # if orig_markup != new_markup:
-      #    self.store.set_value(tree_iter, 1, new_markup)
-      #    self.db.updateTag(tag_id, new_name)
 
-   def onRowActivated(self, view, path, col):
-      model = self.get_model()
-      p_i = path[0]
+   # def onRowActivated(self, view, path, col):
+   #    model = self.get_model()
+   #    p_i = path[0]
+   #    m_iter = model.get_iter(p_i)
+      
+   #    is_dir = model.get_value(m_iter, 0)
+   #    fname = model.get_value(m_iter, 1)
+      
+   #    if is_dir:
+   #       self.flist.setCwdInto(fname)
+   #       self.get_selection().select_path(0)
+   #       self.makeCellVisible(0)
+   #    else:
+   #       f_ops.execute( self.flist.getItemFullPath(fname) )
+      
+   def onItemEnter(self):
+      sel = self.get_selection()
+      if sel.count_selected_rows() != 1:
+         return
+      (model, pathlist) = sel.get_selected_rows()
+      p_i = pathlist[0]
       m_iter = model.get_iter(p_i)
       
       is_dir = model.get_value(m_iter, 0)
@@ -142,7 +156,6 @@ class FileView(gtk.TreeView, ShortkeyMixin):
          self.makeCellVisible(0)
       else:
          f_ops.execute( self.flist.getItemFullPath(fname) )
-      
       
    def onToggleHidden(self):
       sel = self.get_selection()

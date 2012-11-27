@@ -22,7 +22,12 @@ class ShortkeyMixin(object):
       self.connect('key-press-event', self.on_keypress)
 
    def bind_shortkey(self, s, func):
-      mod, keyval = s.split('+')
+      parts = s.split('+')
+      if len(parts)>1:
+         mod,keyval = parts
+      else:
+         mod = None
+         keyval = parts[0]
       keyval = gtk.gdk.keyval_from_name(keyval)
       self.bindings[mod][keyval] = func
 
