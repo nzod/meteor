@@ -1,11 +1,11 @@
 
-__meteor__ is going to be a minimal, Gtk-based file manager for Linux.
+__meteor__ is a work-in-progress, Gtk-based file manager for Linux.
+It is of the two-pane kind, minimizes clutter and comfortable in a tiling wm.
 
-It is written in Python2 and aims for:
+Written in Python2, meteor aims for:
 + simplicity
 + configurability
 + good keyboard control
 + snappy experience
-+ friendliness to tiling wm's
 
-meteor should run on most distros out of the box.
+The program depends on [pyinotify](https://github.com/seb-m/pyinotify).
