@@ -18,9 +18,18 @@ def obj_load(fname):
 
 
 class Config:
-   default = { "opener_program": "gnome-open", 
+   default = { "confirm-deletion": True,
+               "remember-paths": True,
+               "opener-program": "gnome-open", 
                "pathbar": {
                   "position": "top"
+               },
+               "hotkeys": {
+                  "quit": "C+q",
+                  "fview-reload": "C+r",
+                  "fview-toggle-hidden": "C+h",
+                  "fview-nav-up": "M+Up",
+                  "fview-nav-home": "M+Home"
                }
              }
    

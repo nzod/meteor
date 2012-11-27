@@ -77,8 +77,9 @@ class MainWin(gtk.Window, ShortkeyMixin):
 
       self.add(mainbox)
 
-      #-- shortkeys
-      self.bind_shortkey('C+q', self.onQuit)
+      #-- hotkeys
+      k_co = conf['hotkeys']
+      self.bind_shortkey(k_co['quit'], self.onQuit)
       
       #-- set up fileviews
       for fview in self.fviews:

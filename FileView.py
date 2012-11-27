@@ -6,6 +6,7 @@ import gtk
 
 from ShortkeyMixin import ShortkeyMixin
 import f_ops
+from config import conf
 
 
 class FileView(gtk.TreeView, ShortkeyMixin):
@@ -52,10 +53,11 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.set_rules_hint(True)
       
       #-- hotkeys
-      self.bind_shortkey('M+Up', self.onNavUp)
-      self.bind_shortkey('M+Home', self.onNavHome)
-      self.bind_shortkey('C+r', self.onNavReload)
-      self.bind_shortkey('C+h', self.onToggleHidden)
+      k_co = conf['hotkeys']
+      self.bind_shortkey(k_co['fview-nav-up'], self.onNavUp)
+      self.bind_shortkey(k_co['fview-nav-home'], self.onNavHome)
+      self.bind_shortkey(k_co['fview-reload'], self.onNavReload)
+      self.bind_shortkey(k_co['fview-toggle-hidden'], self.onToggleHidden)
       
       #-- model init
       self.connect('row-activated', self.onRowActivated)

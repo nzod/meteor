@@ -11,5 +11,5 @@ def console_get_output(cmd_L):
 
 
 def execute(fname):
-   cmd = '%s "%s"' % (conf['opener_program'], fname)
+   cmd = '%s "%s"' % (conf['opener-program'], fname)
    os.system(cmd)
