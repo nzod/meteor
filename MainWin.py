@@ -20,7 +20,7 @@ class F:
    APP_VER = '0.1'
    install_dir = ''
    
-   filelists = [FileList(), FileList()]
+   filelists = [FileList()]
    curr_flist = 0
    
 
@@ -91,6 +91,9 @@ class MainWin(gtk.Window, ShortkeyMixin):
       self.show_all()
       
    def onQuit(self):
+      for flist in F.filelists:
+         flist.teardown()
+      
       conf.write()
       gtk.main_quit()
       

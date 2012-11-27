@@ -66,6 +66,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
       self.flist = flist
       self.flist.connect('cwd-changed', self.onCwdChanged)
+      self.flist.connect('file-deleted', self.onFileDeleted)
       self.fhistory = {}
       self.group = group
    
@@ -101,6 +102,12 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
    def onCwdChanged(self, srcobj, cwd):
       self.loadFileList()
+   
+   def onFileDeleted(self, srcobj, fname, i):
+      for row in self.store:
+         if row[1]==fname:
+            self.store.remove(row.iter)
+            break
    
    def onNavUp(self):
       currname = self.flist.getCwdName()

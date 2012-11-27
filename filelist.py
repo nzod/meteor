@@ -2,10 +2,21 @@
 
 import re
 import os
+import sys
 
 import pygtk
 pygtk.require('2.0')
 import gobject
+
+import pyinotify
+
+
+class FsEvtHandler(pyinotify.ProcessEvent):
+   def process_IN_CREATE(self, event):
+      self.flist_inst.onFileCreated(event.pathname)
+
+   def process_IN_DELETE(self, event):
+      self.flist_inst.onFileDeleted(event.pathname)
 
 
 def natural_sort(l): 
@@ -21,6 +32,16 @@ class FileList(gobject.GObject):
       self.use_hidden_files = False
       self.cwd = ''
       self.lst = []  # [(fname, is_dir), ]
+      
+      self.watch_mgr = pyinotify.WatchManager()
+      evt_handler = FsEvtHandler()
+      evt_handler.flist_inst = self
+      self.watch_notifier = pyinotify.ThreadedNotifier(self.watch_mgr, evt_handler)
+      self.watch_dd = None
+      self.watch_notifier.start()
+
+   def teardown(self):
+      self.watch_notifier.stop()
 
    def getCwd(self):
       return self.cwd
@@ -61,8 +82,11 @@ class FileList(gobject.GObject):
       if not os.path.isdir(pth):
          print('FileList: not a directory: '+pth)
          return
-         #raise ValueError, pth
-      self.cwd = (pth.rstrip('/') if len(pth)>1 else pth)
+      cwd = (pth.rstrip('/') if len(pth)>1 else pth)
+      if cwd != self.cwd:
+         self.endWatch()
+         self.beginWatch(cwd)
+      self.cwd = cwd
       self.loadCwdList()
       self.emit('cwd-changed', self.cwd)
 
@@ -75,8 +99,35 @@ class FileList(gobject.GObject):
    def setCwdHome(self):
       self.setCwd( os.path.expanduser('~') )
    
+   
+   def beginWatch(self, pth):
+      self.watch_dd = self.watch_mgr.add_watch(pth,
+            pyinotify.IN_DELETE|pyinotify.IN_CREATE, rec=False)
+   
+   def endWatch(self):
+      if self.watch_dd is not None:
+         self.watch_mgr.rm_watch(self.watch_dd.values())
+         self.watch_dd = None
+   
+   def onFileCreated(self, fname):
+      is_dir = os.path.isdir(fname)
+      self.emit('file-created', fname)
+      
+   def onFileDeleted(self, pth):
+      _,fname = os.path.split(pth)
+      
+      for i,item in enumerate(self.lst):
+         if item[0]==fname:
+            del self.lst[i]
+            break
+      del self.lst[i]
+      self.emit('file-deleted', fname, i)
+   
 
 gobject.type_register(FileList)
 gobject.signal_new('cwd-changed', FileList, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_STRING,))
-
+gobject.signal_new('file-created', FileList, gobject.SIGNAL_RUN_FIRST,
+                   gobject.TYPE_NONE, (gobject.TYPE_STRING,))
+gobject.signal_new('file-deleted', FileList, gobject.SIGNAL_RUN_FIRST,
+                   gobject.TYPE_NONE, (gobject.TYPE_STRING, gobject.TYPE_INT))
