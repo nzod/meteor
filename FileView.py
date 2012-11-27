@@ -24,8 +24,8 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_NONE)
    
       fname_renderer = gtk.CellRendererText()
-      #fname_renderer.set_property('editable', True)
-      #fname_renderer.connect('edited', self.onFilenameEdited)
+      fname_renderer.set_property('editable', True)
+      fname_renderer.connect('edited', self.onRenameCommit)
       
       self.col_fname = gtk.TreeViewColumn('Name', fname_renderer, markup=2)
       #self.col_counter = gtk.TreeViewColumn('Count', counter_renderer, markup=2)
@@ -58,6 +58,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.bind_shortkey(k_co['fview-nav-home'], self.onNavHome)
       self.bind_shortkey(k_co['fview-reload'], self.onNavReload)
       self.bind_shortkey(k_co['fview-toggle-hidden'], self.onToggleHidden)
+      self.bind_shortkey(k_co['file-rename'], self.onBeginRename)
       self.bind_shortkey('Return', self.onItemEnter)
       
       #-- model init
@@ -119,10 +120,28 @@ class FileView(gtk.TreeView, ShortkeyMixin):
    def onNavReload(self):
       self.flist.setCwd( self.flist.getCwd() )
    
-   def onFilenameEdited(self, cell, path, new_name):
+   def onBeginRename(self):
+      sel = self.get_selection()
+      if sel.count_selected_rows() != 1:
+         return
+      (model, pathlist) = sel.get_selected_rows()
+      p_i = pathlist[0]
+      self.set_cursor(p_i, self.col_fname, True)
+   
+   def onRenameCommit(self, cell, path, new_name):
       tree_iter = self.store.get_iter(path)
       is_dir = self.store.get_value(tree_iter, 0)
       orig_fname = self.store.get_value(tree_iter, 1)
+      
+      new_name = new_name.strip()
+      if (not new_name) or (new_name==orig_fname):
+         return
+      if self.flist.hasFilename(new_name):
+         return
+      
+      f_ops.rename(self.flist.getCwd(), orig_fname, new_name)
+      self.store.set_value(tree_iter, 1, new_name)
+      self.store.set_value(tree_iter, 2, self.fname_markup(new_name, is_dir))
 
    # def onRowActivated(self, view, path, col):
    #    model = self.get_model()

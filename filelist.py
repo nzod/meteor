@@ -28,6 +28,9 @@ class FileList(gobject.GObject):
    def getCwdName(self):
       return os.path.split(self.cwd)[1]
 
+   def hasFilename(self, fname):
+      return (fname in os.listdir(self.cwd))
+
    def __f_filter(self, fn, is_dir):
       #reads:  self.cwd, self.use_hidden_files
       if fn.startswith('.') and (not self.use_hidden_files):

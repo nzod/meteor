@@ -29,7 +29,8 @@ class Config:
                   "fview-reload": "C+r",
                   "fview-toggle-hidden": "C+h",
                   "fview-nav-up": "M+Up",
-                  "fview-nav-home": "M+Home"
+                  "fview-nav-home": "M+Home",
+                  "file-rename": "F2"
                }
              }
    
