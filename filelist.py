@@ -57,6 +57,7 @@ class FileList(gtk.ListStore):
       for i,row in enumerate(self):
          if row[1]==fname:
             return i
+      return -1
 
    def __f_filter(self, fn, is_dir):
       #reads:  self.cwd, self.use_hidden_files
@@ -69,13 +70,13 @@ class FileList(gtk.ListStore):
 
    def loadCwdList(self):
       lst = os.listdir(self.cwd)
-      lst_dirs = natural_sort( [fn for fn in lst if self.__f_filter(fn, True)] )
-      lst_files = natural_sort( [fn for fn in lst if self.__f_filter(fn, False)] )
-      
+      self.lst_dirs = natural_sort( [fn for fn in lst if self.__f_filter(fn, True)] )
+      self.lst_files = natural_sort( [fn for fn in lst if self.__f_filter(fn, False)] )
+
       self.clear()
-      for fname in lst_dirs:
+      for fname in self.lst_dirs:
          self.append(( True, fname, self.fname_markup_fun(fname, True) ))
-      for fname in lst_files:
+      for fname in self.lst_files:
          self.append(( False, fname, self.fname_markup_fun(fname, False) ))
       
    def getItemFullPath(self, fn):
@@ -117,17 +118,28 @@ class FileList(gtk.ListStore):
          self.watch_mgr.rm_watch(self.watch_dd.values())
          self.watch_dd = None
    
-   def onFileCreated(self, fname):
-      is_dir = os.path.isdir(fname)
+   def onFileCreated(self, pth):
+      _,fname = os.path.split(pth)
+      if fname.startswith('.') and (not self.use_hidden_files):
+         return
+      is_dir = os.path.isdir(pth)
+      if is_dir:
+         self.lst_dirs.append(fname)
+         self.lst_dirs = natural_sort( self.lst_dirs )
+         i = self.lst_dirs.index(fname)
+      else:
+         self.lst_files.append(fname)
+         self.lst_files = natural_sort( self.lst_files )
+         i = len(self.lst_dirs) + self.lst_files.index(fname)
+      self.insert(i, (is_dir, fname, self.fname_markup_fun(fname, is_dir)))
       self.emit('file-created', fname)
       
    def onFileDeleted(self, pth):
       _,fname = os.path.split(pth)
-      for row in self:
-         if row[1]==fname:
-            self.remove(row.iter)
-            break
-      self.emit('file-deleted', fname)
+      i = self.findItemByFname(fname)
+      if i != -1:
+         self.remove( self.get_iter(i) )
+         self.emit('file-deleted', fname)
    
 
 gobject.type_register(FileList)

@@ -20,7 +20,7 @@ class F:
    APP_VER = '0.1'
    install_dir = ''
    
-   filelists = [FileList()]
+   filelists = [FileList(), FileList()]
    curr_flist = 0
    
 
