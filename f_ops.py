@@ -10,8 +10,8 @@ def __get_output(cmd_L):
    return Popen(cmd_L, stdout=subprocess.PIPE).communicate()[0]
 
 
-def execute(full_fname):
-   cmd = [conf['opener-program'], full_fname]
+def execute(full_fn):
+   cmd = [conf['opener-program'], full_fn]
    Popen(cmd)
 
 def rename(pth, fn1, fn2):
@@ -19,6 +19,21 @@ def rename(pth, fn1, fn2):
                 os.path.join(pth, fn2)]
    Popen(cmd)
 
-def newfile(pth, fname):
-   cmd = ['touch', os.path.join(pth, fname)]
+def delete(pth, fns):
+   cmd = ['rm', '-rf']
+   cmd.extend( [os.path.join(pth,fn) for fn in fns] )
+   Popen(cmd)
+
+def move(pth, fns, t_pth):
+   cmd = ['mv', '-f']
+   cmd.extend( [os.path.join(pth,fn) for fn in fns] )
+   cmd.append( t_pth )
+   Popen(cmd)
+
+def newfile(pth, fn):
+   cmd = ['touch', os.path.join(pth, fn)]
+   Popen(cmd)
+
+def newdir(pth, fn):
+   cmd = ['mkdir', os.path.join(pth, fn)]
    Popen(cmd)
