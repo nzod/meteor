@@ -11,6 +11,9 @@ import gobject
 import pyinotify
 
 
+gobject.threads_init()
+
+
 class FsEvtHandler(pyinotify.ProcessEvent):
    def process_IN_CREATE(self, event):
       self.flist_inst.onFileCreated(event.pathname)
@@ -40,6 +43,9 @@ class FileList(gtk.ListStore):
       self.watch_notifier = pyinotify.ThreadedNotifier(self.watch_mgr, evt_handler)
       self.watch_dd = None
       self.watch_notifier.start()
+
+      #self.mod_que = []
+      #gobject.timeout_add_seconds(2, self.eatModQueue)
 
    def teardown(self):
       self.watch_notifier.stop()
@@ -108,7 +114,6 @@ class FileList(gtk.ListStore):
    def setCwdHome(self):
       self.setCwd( os.path.expanduser('~') )
    
-   
    def beginWatch(self, pth):
       self.watch_dd = self.watch_mgr.add_watch(pth,
             pyinotify.IN_DELETE|pyinotify.IN_CREATE, rec=False)
@@ -117,7 +122,7 @@ class FileList(gtk.ListStore):
       if self.watch_dd is not None:
          self.watch_mgr.rm_watch(self.watch_dd.values())
          self.watch_dd = None
-   
+
    def onFileCreated(self, pth):
       _,fname = os.path.split(pth)
       if fname.startswith('.') and (not self.use_hidden_files):
@@ -139,6 +144,11 @@ class FileList(gtk.ListStore):
       i = self.findItemByFname(fname)
       if i != -1:
          self.remove( self.get_iter(i) )
+         try:
+            self.lst_dirs.remove(fname)
+            self.lst_files.remove(fname)
+         except:
+            pass
          self.emit('file-deleted', fname)
    
 
