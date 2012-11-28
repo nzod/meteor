@@ -2,6 +2,7 @@
 
 import re
 import os
+import Queue
 
 import pygtk
 pygtk.require('2.0')
@@ -44,8 +45,12 @@ class FileList(gtk.ListStore):
       self.watch_dd = None
       self.watch_notifier.start()
 
-      #self.mod_que = []
-      #gobject.timeout_add_seconds(2, self.eatModQueue)
+      self.mod_que = Queue.Queue()
+      self.mod_funs = {
+         '+': self.mod_AddFile,
+         '-': self.mod_DeleteFile
+      }
+      self.mod_q_timer = None
 
    def teardown(self):
       self.watch_notifier.stop()
@@ -117,13 +122,41 @@ class FileList(gtk.ListStore):
    def beginWatch(self, pth):
       self.watch_dd = self.watch_mgr.add_watch(pth,
             pyinotify.IN_DELETE|pyinotify.IN_CREATE, rec=False)
-   
+      self.mod_q_timer = gobject.timeout_add_seconds(2, self.eatModQueue)
+
    def endWatch(self):
       if self.watch_dd is not None:
          self.watch_mgr.rm_watch(self.watch_dd.values())
          self.watch_dd = None
+         gobject.source_remove(self.mod_q_timer)
+         self.eatModQueue()
+
+   def eatModQueue(self, widget=None, data=None):
+      while True:
+         try:
+            item = self.mod_que.get(False)
+            self.execMod(item)
+         except Queue.Empty:
+            #print 'mod queue is empty, nothing to do'
+            return True
 
    def onFileCreated(self, pth):
+      try:
+         self.mod_que.put(('+',pth), False)
+      except Queue.Full:
+         print 'mod queue is full!'
+
+   def onFileDeleted(self, pth):
+      try:
+         self.mod_que.put(('-',pth), False)
+      except Queue.Full:
+         print 'mod queue is full!'
+
+   def execMod(self, item):
+      cmd, pth = item
+      self.mod_funs[cmd](pth)
+      
+   def mod_AddFile(self, pth):
       _,fname = os.path.split(pth)
       if fname.startswith('.') and (not self.use_hidden_files):
          return
@@ -138,8 +171,8 @@ class FileList(gtk.ListStore):
          i = len(self.lst_dirs) + self.lst_files.index(fname)
       self.insert(i, (is_dir, fname, self.fname_markup_fun(fname, is_dir)))
       self.emit('file-created', fname)
-      
-   def onFileDeleted(self, pth):
+
+   def mod_DeleteFile(self, pth):
       _,fname = os.path.split(pth)
       i = self.findItemByFname(fname)
       if i != -1:
@@ -150,6 +183,8 @@ class FileList(gtk.ListStore):
          except:
             pass
          self.emit('file-deleted', fname)
+
+      
    
 
 gobject.type_register(FileList)
