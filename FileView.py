@@ -130,8 +130,8 @@ class FileView(gtk.TreeView, ShortkeyMixin):
          return
       
       f_ops.rename(self.flist.getCwd(), orig_fname, new_name)
-      self.flist.set_value(tree_iter, 1, new_name)
-      self.flist.set_value(tree_iter, 2, fname_markup(new_name, is_dir))
+      #self.flist.set_value(tree_iter, 1, new_name)
+      #self.flist.set_value(tree_iter, 2, fname_markup(new_name, is_dir))
 
    # def onRowActivated(self, view, path, col):
    #    model = self.get_model()

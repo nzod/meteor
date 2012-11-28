@@ -15,14 +15,6 @@ import pyinotify
 gobject.threads_init()
 
 
-class FsEvtHandler(pyinotify.ProcessEvent):
-   def process_IN_CREATE(self, event):
-      self.flist_inst.onFileCreated(event.pathname)
-
-   def process_IN_DELETE(self, event):
-      self.flist_inst.onFileDeleted(event.pathname)
-
-
 def natural_sort(l): 
    convert = lambda text: int(text) if text.isdigit() else text.lower() 
    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
@@ -101,7 +93,7 @@ class FileList(gtk.ListStore):
    def setCwd(self, pth):
       if not os.path.isdir(pth):
          print('FileList: not a directory: '+pth)
-         return
+         return -1
       cwd = (pth.rstrip('/') if len(pth)>1 else pth)
       if cwd != self.cwd:
          self.endWatch()
@@ -111,17 +103,28 @@ class FileList(gtk.ListStore):
       self.emit('cwd-changed', self.cwd)
 
    def setCwdUp(self):
-      self.setCwd( os.path.split(self.cwd)[0] )
+      return self.setCwd( os.path.split(self.cwd)[0] )
    
    def setCwdInto(self, dirname):
       self.setCwd( os.path.join(self.cwd, dirname) )
    
    def setCwdHome(self):
       self.setCwd( os.path.expanduser('~') )
+
+   def onCwdGone(self):
+      cwd = self.cwd
+      while True:
+         cwd = os.path.split(cwd)[0]
+         cwd = (cwd.rstrip('/') if len(cwd)>1 else cwd)
+         if -1 != self.setCwd(cwd):
+            break
    
    def beginWatch(self, pth):
       self.watch_dd = self.watch_mgr.add_watch(pth,
-            pyinotify.IN_DELETE|pyinotify.IN_CREATE, rec=False)
+            pyinotify.IN_DELETE|pyinotify.IN_CREATE|
+              pyinotify.IN_MOVED_FROM|pyinotify.IN_MOVED_TO|
+              pyinotify.IN_DELETE_SELF|pyinotify.IN_MOVE_SELF,
+            rec=False)
       self.mod_q_timer = gobject.timeout_add_seconds(2, self.eatModQueue)
 
    def endWatch(self):
@@ -137,7 +140,6 @@ class FileList(gtk.ListStore):
             item = self.mod_que.get(False)
             self.execMod(item)
          except Queue.Empty:
-            #print 'mod queue is empty, nothing to do'
             return True
 
    def onFileCreated(self, pth):
@@ -184,8 +186,6 @@ class FileList(gtk.ListStore):
             pass
          self.emit('file-deleted', fname)
 
-      
-   
 
 gobject.type_register(FileList)
 gobject.signal_new('cwd-changed', FileList, gobject.SIGNAL_RUN_FIRST,
@@ -194,3 +194,23 @@ gobject.signal_new('file-created', FileList, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_STRING,))
 gobject.signal_new('file-deleted', FileList, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_STRING,))
+
+
+class FsEvtHandler(pyinotify.ProcessEvent):
+   def process_IN_CREATE(self, evt):
+      self.flist_inst.onFileCreated(evt.pathname)
+
+   def process_IN_MOVED_TO(self, evt):
+      self.flist_inst.onFileCreated(evt.pathname)
+
+   def process_IN_DELETE(self, evt):
+      self.flist_inst.onFileDeleted(evt.pathname)
+
+   def process_IN_MOVED_FROM(self, evt):
+      self.flist_inst.onFileDeleted(evt.pathname)
+
+   def process_IN_DELETE_SELF(self, evt):
+      self.flist_inst.onCwdGone()
+
+   def process_IN_MOVE_SELF(self, evt):
+      self.flist_inst.onCwdGone()
