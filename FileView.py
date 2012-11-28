@@ -62,12 +62,11 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.set_rules_hint(True)
       
       #-- hotkeys
-      k_co = conf['hotkeys']
-      self.bind_shortkey(k_co['fview-nav-up'], self.onNavUp)
-      self.bind_shortkey(k_co['fview-nav-home'], self.onNavHome)
-      self.bind_shortkey(k_co['fview-reload'], self.onNavReload)
-      self.bind_shortkey(k_co['fview-toggle-hidden'], self.onToggleHidden)
-      self.bind_shortkey(k_co['file-rename'], self.onBeginRename)
+      self.bind_shortkey(conf['k-nav-up'], self.onNavUp)
+      self.bind_shortkey(conf['k-nav-home'], self.onNavHome)
+      self.bind_shortkey(conf['k-reload'], self.onNavReload)
+      self.bind_shortkey(conf['k-toggle-hidden'], self.onToggleHidden)
+      self.bind_shortkey(conf['k-file-rename'], self.onBeginRename)
       self.bind_shortkey('Return', self.onItemEnter)
       
       #-- model init

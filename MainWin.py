@@ -78,12 +78,14 @@ class MainWin(gtk.Window, ShortkeyMixin):
       self.add(mainbox)
 
       #-- hotkeys
-      k_co = conf['hotkeys']
-      self.bind_shortkey(k_co['quit'], self.onQuit)
+      self.bind_shortkey(conf['k-quit'], self.onQuit)
       
       #-- set up fileviews
-      for fview in self.fviews:
-         fview.fileview.onNavHome()
+      for i,fview in enumerate(self.fviews):
+         if conf['remember-paths'] and conf['saved-paths'][i]:
+            F.filelists[i].setCwd( conf['saved-paths'][i] )
+         else:
+            F.filelists[i].setCwdHome()
          fview.fileview.connect('focus-in-event', self.onFviewFocusIn)
       self.fviews[0].setActive(True)
       
@@ -91,7 +93,9 @@ class MainWin(gtk.Window, ShortkeyMixin):
       self.show_all()
       
    def onQuit(self):
-      for flist in F.filelists:
+      for i,flist in enumerate(F.filelists):
+         if conf['remember-paths']:
+            conf['saved-paths'][i] = flist.getCwd()
          flist.teardown()
       
       conf.write()

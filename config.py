@@ -6,7 +6,7 @@ import json
 
 def obj_save(obj, fname):
    with open(fname, 'w') as f:
-      json.dump(obj, f, indent=3)
+      json.dump(obj, f, indent=3, sort_keys=True)
 
 def obj_load(fname):
    try:
@@ -18,32 +18,34 @@ def obj_load(fname):
 
 
 class Config:
-   default = { "confirm-deletion": True,
-               "remember-paths": True,
-               "opener-program": "gnome-open", 
-               "pathbar": {
-                  "position": "top"
-               },
-               "hotkeys": {
-                  "quit": "C+q",
-                  "fview-reload": "C+r",
-                  "fview-toggle-hidden": "C+h",
-                  "fview-nav-up": "M+Up",
-                  "fview-nav-home": "M+Home",
-                  "file-rename": "F2"
-               }
-             }
+   default = {
+      'confirm-deletion': True,
+      'remember-paths': False,
+      'saved-paths': ['', ''],
+      'opener-program': 'gnome-open',
+      'pathbar-pos': 'top',
+      'k-quit': 'C+q',
+      'k-reload': 'C+r',
+      'k-toggle-hidden': 'C+h',
+      'k-nav-up': 'M+Up',
+      'k-nav-home': 'M+Home',
+      'k-file-rename': 'F2'
+     }
    
    def __init__(self, fname):
       self.o = {}
       self.fname = os.path.expanduser('~/.%s' % fname)
-      
       if os.path.isfile(self.fname):
          self.o = obj_load(self.fname)
          if self.o is None:
-            self.o = Config.default
-      else:
-         self.o = Config.default
+            self.o = {}
+      self.updateKeys()
+
+   def updateKeys(self):
+      defc = Config.default
+      for ck in defc.iterkeys():
+         if ck not in self.o:
+            self.o[ck] = defc[ck]
 
    def __getitem__(self, k):
       return self.o[k]
