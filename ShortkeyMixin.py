@@ -3,13 +3,7 @@
 import pygtk
 pygtk.require('2.0')
 import gtk
-
-
-def ctrl_down(state):
-   return state & gtk.gdk.CONTROL_MASK
-
-def alt_down(state):
-   return state & gtk.gdk.MOD1_MASK
+import gtk.gdk as gdk
 
 
 class ShortkeyMixin(object):
@@ -33,12 +27,13 @@ class ShortkeyMixin(object):
 
    def on_keypress(self, widget, data=None):
       mod = None
-      
-      if ctrl_down(data.state) and alt_down(data.state):
+      sta = data.state
+
+      if sta & gdk.CONTROL_MASK and sta & gdk.MOD1_MASK:
          mod = 'CM'
-      elif ctrl_down(data.state) and data.keyval != 65513:
+      elif sta & gdk.CONTROL_MASK:
          mod = 'C'
-      elif alt_down(data.state) and data.keyval != 65507:
+      elif sta & gdk.MOD1_MASK:
          mod = 'M'
       
       if data.keyval in self.bindings[mod]:

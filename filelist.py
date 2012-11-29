@@ -22,8 +22,12 @@ def natural_sort(l):
 
 
 class FileList(gtk.ListStore):
+   MARK_COLOR = '#bebebe'
+   MARK_SEL_COLOR = '#DA8B21'
+
    def __init__(self):
-      gtk.ListStore.__init__(self, bool, str, str)  # is_dir, fname, fname_markup
+      gtk.ListStore.__init__(self, bool, str, str, str)
+                        # is_dir, fname, fname_markup, marktxt
       
       self.use_hidden_files = False
       self.cwd = ''
@@ -62,6 +66,16 @@ class FileList(gtk.ListStore):
             return i
       return -1
 
+   def addMark(self, i):
+      self.set(i, 3, FileList.MARK_SEL_COLOR)
+   
+   def rmMark(self, i):
+      self.set(i, 3, FileList.MARK_COLOR)
+
+   def rmAllMarks(self):
+      for i in xrange(len(self)):
+         self.rmMark(self.get_iter(i))
+
    def __f_filter(self, fn, is_dir):
       #reads:  self.cwd, self.use_hidden_files
       if fn.startswith('.') and (not self.use_hidden_files):
@@ -78,9 +92,9 @@ class FileList(gtk.ListStore):
 
       self.clear()
       for fname in self.lst_dirs:
-         self.append(( True, fname, self.fname_markup_fun(fname, True) ))
+         self.append(( True, fname, self.fname_markup_fun(fname, True), FileList.MARK_COLOR ))
       for fname in self.lst_files:
-         self.append(( False, fname, self.fname_markup_fun(fname, False) ))
+         self.append(( False, fname, self.fname_markup_fun(fname, False), FileList.MARK_COLOR ))
       
    def getItemFullPath(self, fn):
       return os.path.join(self.cwd, fn)
@@ -171,7 +185,7 @@ class FileList(gtk.ListStore):
          self.lst_files.append(fname)
          self.lst_files = natural_sort( self.lst_files )
          i = len(self.lst_dirs) + self.lst_files.index(fname)
-      self.insert(i, (is_dir, fname, self.fname_markup_fun(fname, is_dir)))
+      self.insert(i, (is_dir, fname, self.fname_markup_fun(fname, is_dir), FileList.MARK_COLOR))
       self.emit('file-created', fname)
 
    def mod_DeleteFile(self, pth):

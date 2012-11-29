@@ -25,7 +25,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.flist = flist
       self.flist.fname_markup_fun = fname_markup
       
-      self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+      #self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
       #self.set_rubber_banding(True)
       #self.set_enable_search(True)
       
@@ -35,13 +35,19 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       fname_renderer = gtk.CellRendererText()
       fname_renderer.set_property('editable', True)
       fname_renderer.connect('edited', self.onRenameCommit)
+      mark_renderer = gtk.CellRendererText()
       
       self.col_fname = gtk.TreeViewColumn('Name', fname_renderer, markup=2)
-      #self.col_counter = gtk.TreeViewColumn('Count', counter_renderer, markup=2)
+      self.col_mark = gtk.TreeViewColumn('Xxx', mark_renderer, background=3)
       
       self.col_fname.set_sizing(gtk.TREE_VIEW_COLUMN_FIXED)
       self.col_fname.set_expand(True)
+      #self.col_mark.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE)
+      self.col_mark.set_expand(False)
+      self.col_mark.set_property('min-width', 9)
+      self.col_mark.set_property('max-width', 9)
       
+      self.append_column(self.col_mark)
       self.append_column(self.col_fname)
       
       gtk.rc_parse_string( """
@@ -61,16 +67,23 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.set_name('filelist_view_inactive')
       self.set_rules_hint(True)
       
+      self.marked_names = {}
+      
       #-- hotkeys
       self.bind_shortkey(conf['k-nav-up'], self.onNavUp)
       self.bind_shortkey(conf['k-nav-home'], self.onNavHome)
       self.bind_shortkey(conf['k-reload'], self.onNavReload)
       self.bind_shortkey(conf['k-toggle-hidden'], self.onToggleHidden)
       self.bind_shortkey(conf['k-file-rename'], self.onBeginRename)
+      self.bind_shortkey(conf['k-mark'], self.onToggleMark)
+      self.bind_shortkey(conf['k-mark-all'], self.onToggleMarkAll)
+      self.bind_shortkey(conf['k-mark-section'], self.onMarkSection)
+      self.bind_shortkey(conf['k-mark-inverse'], self.onMarkInverse)
       self.bind_shortkey('Return', self.onItemEnter)
       
       #-- model init
       self.flist.connect('cwd-changed', self.onCwdChanged)
+      self.flist.connect('file-deleted', self.onFileDeleted)
       self.group = group
       
       #self.connect('row-activated', self.onRowActivated)
@@ -91,8 +104,13 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       #    self.scroll_to_cell(i)
             
    def onCwdChanged(self, srcobj, cwd):
-      #self.loadFileList()
-      pass
+      self.marked_names = {}
+   
+   def onFileDeleted(self, srcobj, fname):
+      try:
+         del self.marked_names[fname]
+      except KeyError:
+         pass
    
    def onNavUp(self):
       currname = self.flist.getCwdName()
@@ -185,3 +203,46 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
       if first_sel is not None:
          self.makeCellVisible(first_sel)
+
+   def onToggleMark(self):
+      (model,i) = self.get_selection().get_selected()
+      if i is None:
+         return
+      fname = model.get_value(i, 1)
+      if fname in self.marked_names:
+         del self.marked_names[fname]
+         model.rmMark(i)
+      else:
+         self.marked_names[fname] = None
+         model.addMark(i)
+      
+   def onToggleMarkAll(self):
+      if len(self.flist)==len(self.marked_names):
+         self.flist.rmAllMarks()
+         self.marked_names = {}
+      else:
+         for i,row in enumerate(self.flist):
+            fname = row[1]
+            if fname not in self.marked_names:
+               self.marked_names[fname] = None
+               self.flist.addMark(self.flist.get_iter(i))
+
+   def onMarkSection(self):
+      (model,i) = self.get_selection().get_selected()
+      if i is None:
+         return
+      #TODO
+
+   def onMarkInverse(self):
+      for i,row in enumerate(self.flist):
+         fname = row[1]
+         if fname in self.marked_names:
+            del self.marked_names[fname]
+            self.flist.rmMark(self.flist.get_iter(i))
+         else:
+            self.marked_names[fname] = None
+            self.flist.addMark(self.flist.get_iter(i))
+
+
+               
+

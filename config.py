@@ -29,7 +29,12 @@ class Config:
       'k-toggle-hidden': 'C+h',
       'k-nav-up': 'M+Up',
       'k-nav-home': 'M+Home',
-      'k-file-rename': 'F2'
+      'k-file-rename': 'F2',
+      'k-file-delete': 'C+k',
+      'k-mark': 'm',
+      'k-mark-all': 'M+m',
+      'k-mark-section': 'C+m',
+      'k-mark-inverse': 'CM+m'
      }
    
    def __init__(self, fname):
