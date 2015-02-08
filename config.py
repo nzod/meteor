@@ -20,8 +20,8 @@ def obj_load(fname):
 class Config:
    default = {
       'confirm-deletion': True,
-      'remember-paths': False,
-      'saved-paths': ['', ''],
+      'remember-paths': True,
+      'saved-paths': [],
       'opener-program': 'xdg-open',
       'pathbar-pos': 'top',
       'k-quit': 'C+q',

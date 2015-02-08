@@ -41,8 +41,8 @@ class MainWin(gtk.Window, ShortkeyMixin):
       
       #-- set up fileviews
       for i,fview in enumerate(self.fviews):
-         if conf['remember-paths'] and conf['saved-paths'][i]:
-            self.filelists[i].setCwd( conf['saved-paths'][i] )
+         if conf['remember-paths'] and len(conf['saved-paths'])>=i+1:
+            self.filelists[i].setCwd(conf['saved-paths'][i])
          else:
             self.filelists[i].setCwdHome()
          fview.fileview.connect('focus-in-event', self.onFviewFocusIn)
@@ -52,10 +52,12 @@ class MainWin(gtk.Window, ShortkeyMixin):
       self.show_all()
       
    def onQuit(self):
+      saved_paths = []
       for i,flist in enumerate(self.filelists):
-         if conf['remember-paths']:
-            conf['saved-paths'][i] = flist.getCwd()
+         saved_paths.append(flist.getCwd())
          flist.teardown()
+      if conf['remember-paths']:
+         conf['saved-paths'] = saved_paths
       
       conf.write()
       gtk.main_quit()
