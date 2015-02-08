@@ -22,7 +22,7 @@ class Config:
       'confirm-deletion': True,
       'remember-paths': False,
       'saved-paths': ['', ''],
-      'opener-program': 'gnome-open',
+      'opener-program': 'xdg-open',
       'pathbar-pos': 'top',
       'k-quit': 'C+q',
       'k-reload': 'C+r',
