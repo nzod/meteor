@@ -39,7 +39,7 @@ class Config:
    
    def __init__(self, fname):
       self.o = {}
-      self.fname = os.path.expanduser('~/.%s' % fname)
+      self.fname = os.path.expanduser('~/.%s.json' % fname)
       if os.path.isfile(self.fname):
          self.o = obj_load(self.fname)
          if self.o is None:
