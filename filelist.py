@@ -32,6 +32,9 @@ class FileList(gtk.ListStore):
       self.use_hidden_files = False
       self.cwd = ''
       
+      self.lst_dirs = []
+      self.lst_files = []
+      
       self.name_markup_fun = None #assigned later by owner list
       
       self.watch_mgr = pyinotify.WatchManager()
