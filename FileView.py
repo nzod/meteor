@@ -64,6 +64,8 @@ class FileView(gtk.TreeView, ShortkeyMixin):
     """)
       self.set_name('filelist_view_inactive')
       self.set_rules_hint(True)
+      self.modify_base(gtk.STATE_SELECTED, gtk.gdk.color_parse('#bbb'))
+      self.modify_base(gtk.STATE_ACTIVE, gtk.gdk.color_parse('#bbb'))
       
       self.marked_names = {}
       
