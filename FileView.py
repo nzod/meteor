@@ -25,10 +25,6 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.flist = flist
       self.flist.fname_markup_fun = fname_markup
       
-      #self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
-      #self.set_rubber_banding(True)
-      #self.set_enable_search(True)
-      
       self.set_headers_visible(False)
       self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_NONE)
    
@@ -86,7 +82,6 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.flist.connect('file-deleted', self.onFileDeleted)
       self.group = group
       
-      #self.connect('row-activated', self.onRowActivated)
    
    def clear(self):
       self.flist.clear()
@@ -99,9 +94,6 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
    def makeCellVisible(self, i):
       self.scroll_to_cell(i)
-      # a,b = self.get_visible_range()  # always None for some reason...
-      # if i<a+1 or i>b-1:
-      #    self.scroll_to_cell(i)
             
    def onCwdChanged(self, srcobj, cwd):
       self.marked_names = {}
@@ -149,23 +141,6 @@ class FileView(gtk.TreeView, ShortkeyMixin):
          return
       
       f_ops.rename(self.flist.getCwd(), orig_fname, new_name)
-      #self.flist.set_value(tree_iter, 1, new_name)
-      #self.flist.set_value(tree_iter, 2, fname_markup(new_name, is_dir))
-
-   # def onRowActivated(self, view, path, col):
-   #    model = self.get_model()
-   #    p_i = path[0]
-   #    m_iter = model.get_iter(p_i)
-      
-   #    is_dir = model.get_value(m_iter, 0)
-   #    fname = model.get_value(m_iter, 1)
-      
-   #    if is_dir:
-   #       self.flist.setCwdInto(fname)
-   #       self.get_selection().select_path(0)
-   #       self.makeCellVisible(0)
-   #    else:
-   #       f_ops.execute( self.flist.getItemFullPath(fname) )
       
    def onItemEnter(self):
       sel = self.get_selection()
