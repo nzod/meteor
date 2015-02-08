@@ -14,39 +14,19 @@ from ShortkeyMixin import ShortkeyMixin
 from FileViewPane import FileViewPane
 
 
-class F:
-   APP_NAME = 'meteor'
-   APP_VER = '0.1'
-   install_dir = ''
-   
-   filelists = [FileList(), FileList()]
-   curr_flist = 0
-   
-
-def confirm(text):
-   dlg = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION, buttons=gtk.BUTTONS_OK_CANCEL)
-   dlg.set_markup(text)
-   response = dlg.run()
-   dlg.destroy()
-   return (response==gtk.RESPONSE_OK)
-
-
 
 class MainWin(gtk.Window, ShortkeyMixin):
    def __init__(self):
       gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
       ShortkeyMixin.__init__(self)
       
-      self.set_title(F.APP_NAME)
+      self.set_title('meteor')
       self.set_default_size(480, 460)
       self.connect('delete_event', self.delete_event)
       
-      #-- resources
-      F.install_dir = os.path.dirname( os.path.realpath(__file__) )
-      ui_imgname = lambda s: os.path.join( F.conf['install-dir'], 'img', '%s.png'%s )
-      
       #-- main widgets
-      self.fviews = [FileViewPane(flist) for flist in F.filelists]
+      self.filelists = [FileList(), FileList()]
+      self.fviews = [FileViewPane(flist) for flist in self.filelists]
       
       #-- layout
       mainbox = gtk.HBox()
@@ -62,9 +42,9 @@ class MainWin(gtk.Window, ShortkeyMixin):
       #-- set up fileviews
       for i,fview in enumerate(self.fviews):
          if conf['remember-paths'] and conf['saved-paths'][i]:
-            F.filelists[i].setCwd( conf['saved-paths'][i] )
+            self.filelists[i].setCwd( conf['saved-paths'][i] )
          else:
-            F.filelists[i].setCwdHome()
+            self.filelists[i].setCwdHome()
          fview.fileview.connect('focus-in-event', self.onFviewFocusIn)
       self.fviews[0].setActive(True)
       
@@ -72,7 +52,7 @@ class MainWin(gtk.Window, ShortkeyMixin):
       self.show_all()
       
    def onQuit(self):
-      for i,flist in enumerate(F.filelists):
+      for i,flist in enumerate(self.filelists):
          if conf['remember-paths']:
             conf['saved-paths'][i] = flist.getCwd()
          flist.teardown()
