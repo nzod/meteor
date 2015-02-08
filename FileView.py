@@ -71,11 +71,12 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.bind_shortkey(conf['k-reload'], self.onNavReload)
       self.bind_shortkey(conf['k-toggle-hidden'], self.onToggleHidden)
       self.bind_shortkey(conf['k-file-rename'], self.onBeginRename)
+      self.bind_shortkey('Return', self.onItemEnter)
+      self.bind_shortkey(conf['k-file-delete'], self.onDoDelete)
       self.bind_shortkey(conf['k-mark'], self.onToggleMark)
       self.bind_shortkey(conf['k-mark-all'], self.onToggleMarkAll)
       self.bind_shortkey(conf['k-mark-section'], self.onMarkSection)
       self.bind_shortkey(conf['k-mark-inverse'], self.onMarkInverse)
-      self.bind_shortkey('Return', self.onItemEnter)
       
       #-- model init
       self.flist.connect('cwd-changed', self.onCwdChanged)
@@ -160,7 +161,10 @@ class FileView(gtk.TreeView, ShortkeyMixin):
             self.makeCellVisible(0)
       else:
          f_ops.execute( self.flist.getItemFullPath(fname) )
-      
+   
+   def onDoDelete(self):
+      f_ops.delete( self.flist.getCwd(), self.marked_names.keys() )
+   
    def onToggleHidden(self):
       sel = self.get_selection()
       (model, pathlist) = sel.get_selected_rows()
@@ -221,6 +225,11 @@ class FileView(gtk.TreeView, ShortkeyMixin):
             self.marked_names[fname] = None
             self.flist.addMark(self.flist.get_iter(i))
 
-
+   def anyMarked(self):
+      return bool(self.marked_names)
+   
+   def iterMarked(self):
+      for name in self.marked_names:
+         yield name
                
 
