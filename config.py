@@ -31,6 +31,8 @@ class Config:
       'k-nav-home': 'M+Home',
       'k-file-rename': 'F2',
       'k-file-delete': 'C+k',
+      'k-new-file': 'C+n',
+      'k-new-dir': 'M+n',
       'k-mark': 'm',
       'k-mark-all': 'M+m',
       'k-mark-section': 'C+m',

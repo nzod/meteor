@@ -6,7 +6,7 @@ import gtk
 
 from FileView import FileView
 from PathBar import PathBar
-
+from EditorBar import EditorBar
 
 
 class FileViewPane(gtk.EventBox):
@@ -19,12 +19,21 @@ class FileViewPane(gtk.EventBox):
       fileview_container.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
       
       self.pathbar = PathBar(self.fileview)
+      self.editorbar = EditorBar()
       
-      box = gtk.VBox()
-      box.pack_start(self.pathbar, expand=False)
-      box.pack_start(fileview_container, expand=True)
-      self.add(box)
+      self.box = gtk.VBox()
+      self.box.pack_start(self.pathbar, expand=False)
+      self.box.pack_start(fileview_container, expand=True)
+      self.box.pack_start(self.editorbar, expand=False)
+      self.add(self.box)
    
    def setActive(self, active):
       self.pathbar.setActive(active)
       self.fileview.setActive(active)
+
+   def showEditor(self):
+      self.box.pack_end(self.editorbar, expand=False)
+   
+   def hideEditor(self):
+      self.box.remove(self.editorbar)
+      

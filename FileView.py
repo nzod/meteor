@@ -50,12 +50,12 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
       gtk.rc_parse_string( """
         style "filelist-style-active"{
-            GtkTreeView::odd-row-color = "#ddd"
+            GtkTreeView::odd-row-color = "#eee"
             GtkTreeView::even-row-color = "#eee"
             GtkTreeView::allow-rules = 1
         }
         style "filelist-style-inactive"{
-            GtkTreeView::odd-row-color = "#bbb"
+            GtkTreeView::odd-row-color = "#ccc"
             GtkTreeView::even-row-color = "#ccc"
             GtkTreeView::allow-rules = 1
         }
@@ -75,6 +75,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       self.bind_shortkey(conf['k-file-rename'], self.onBeginRename)
       self.bind_shortkey('Return', self.onItemEnter)
       self.bind_shortkey(conf['k-file-delete'], self.onDoDelete)
+      self.bind_shortkey(conf['k-new-file'], self.onDoNewFile)
       self.bind_shortkey(conf['k-mark'], self.onToggleMark)
       self.bind_shortkey(conf['k-mark-all'], self.onToggleMarkAll)
       self.bind_shortkey(conf['k-mark-section'], self.onMarkSection)
@@ -168,6 +169,9 @@ class FileView(gtk.TreeView, ShortkeyMixin):
    
    def onDoDelete(self):
       f_ops.delete( self.flist.getCwd(), self.marked_names.keys() )
+   
+   def onDoNewFile(self):
+      self.parent_pane.showEditor()
    
    def onToggleHidden(self):
       sel = self.get_selection()

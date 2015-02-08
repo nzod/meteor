@@ -20,12 +20,12 @@ class MainWin(gtk.Window, ShortkeyMixin):
       gtk.Window.__init__(self, gtk.WINDOW_TOPLEVEL)
       ShortkeyMixin.__init__(self)
       
-      self.set_title('meteor')
-      self.set_default_size(480, 460)
+      self.set_title('zfm')
+      self.set_default_size(360, 460)
       self.connect('delete_event', self.delete_event)
       
       #-- main widgets
-      self.filelists = [FileList(), FileList()]
+      self.filelists = [FileList()]
       self.fviews = [FileViewPane(flist) for flist in self.filelists]
       
       #-- layout
