@@ -1,11 +1,4 @@
 
-_meteor_ is a __work-in-progress__, Gtk-based file manager.
-It minimizes clutter and is comfortable in a tiling wm.
+_meteor_ is a work-in-progress, keyboard-oriented file manager for Linux.
 
-Written in Python2, meteor aims for:
-+ simplicity
-+ configurability
-+ good keyboard control
-+ snappy experience
-
-To use it, install the [pyinotify](https://github.com/seb-m/pyinotify) module.
+It needs PyGTK and [pyinotify](https://github.com/seb-m/pyinotify).
