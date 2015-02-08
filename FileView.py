@@ -3,6 +3,7 @@
 import pygtk
 pygtk.require('2.0')
 import gtk
+import glib
 
 from ShortkeyMixin import ShortkeyMixin
 import f_ops
@@ -14,7 +15,8 @@ def fname_markup(fname, is_dir):
       if is_dir:
          desc += 'bold'
       desc += ' 10.0'
-      return '<span font_desc="%s" foreground="#333">%s</span>' % (desc, fname)
+      return '<span font_desc="%s" foreground="#333">%s</span>' % (
+                                    desc, glib.markup_escape_text(fname))
       
 
 class FileView(gtk.TreeView, ShortkeyMixin):
