@@ -18,9 +18,11 @@ def fname_markup(fname, is_dir):
       
 
 class FileView(gtk.TreeView, ShortkeyMixin):
-   def __init__(self, flist, group):
+   def __init__(self, flist, parent_pane):
       gtk.TreeView.__init__(self, flist)
       ShortkeyMixin.__init__(self)
+      
+      self.parent_pane = parent_pane
       
       self.flist = flist
       self.flist.fname_markup_fun = fname_markup
@@ -81,7 +83,6 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       #-- model init
       self.flist.connect('cwd-changed', self.onCwdChanged)
       self.flist.connect('file-deleted', self.onFileDeleted)
-      self.group = group
       
    
    def clear(self):
@@ -89,6 +90,9 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
    def getFileList(self):
       return self.flist
+   
+   def getPane(self):
+      return self.parent_pane
       
    def setActive(self, active):
       self.set_name('filelist_view_%s' % ('active' if active else 'inactive'))

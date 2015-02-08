@@ -11,8 +11,7 @@ import gobject
 from config import conf
 from filelist import FileList
 from ShortkeyMixin import ShortkeyMixin
-from FileView import FileView
-from PathBar import PathBar
+from FileViewPane import FileViewPane
 
 
 class F:
@@ -32,26 +31,6 @@ def confirm(text):
    return (response==gtk.RESPONSE_OK)
 
 
-class FileViewGroup(gtk.EventBox):
-   def __init__(self, flist):
-      gtk.EventBox.__init__(self)
-      
-      self.fileview = FileView(flist, self)
-      fileview_container = gtk.ScrolledWindow()
-      fileview_container.add(self.fileview)
-      fileview_container.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
-      
-      self.pathbar = PathBar(self.fileview)
-      
-      box = gtk.VBox()
-      box.pack_start(self.pathbar, expand=False)
-      box.pack_start(fileview_container, expand=True)
-      self.add(box)
-   
-   def setActive(self, active):
-      self.pathbar.setActive(active)
-      self.fileview.setActive(active)
-
 
 class MainWin(gtk.Window, ShortkeyMixin):
    def __init__(self):
@@ -67,7 +46,7 @@ class MainWin(gtk.Window, ShortkeyMixin):
       ui_imgname = lambda s: os.path.join( F.conf['install-dir'], 'img', '%s.png'%s )
       
       #-- main widgets
-      self.fviews = [FileViewGroup(flist) for flist in F.filelists]
+      self.fviews = [FileViewPane(flist) for flist in F.filelists]
       
       #-- layout
       mainbox = gtk.HBox()
@@ -108,5 +87,5 @@ class MainWin(gtk.Window, ShortkeyMixin):
    def onFviewFocusIn(self, evt_fview, evt):
       for fview in self.fviews:
          fview.setActive(False)
-      evt_fview.group.setActive(True)
+      evt_fview.getPane().setActive(True)
          
