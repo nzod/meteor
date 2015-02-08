@@ -116,13 +116,15 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       currname = self.flist.getCwdName()
       self.flist.setCwdUp()
       i = self.flist.findItemByFname(currname)
-      self.get_selection().select_path(i)
-      self.makeCellVisible(i)
+      if i != -1:
+         self.get_selection().select_path(i)
+         self.makeCellVisible(i)
       
    def onNavHome(self):
       self.flist.setCwdHome()
-      self.get_selection().select_path(0)
-      self.makeCellVisible(0)
+      if len(self.flist) > 0:
+         self.get_selection().select_path(0)
+         self.makeCellVisible(0)
       
    def onNavReload(self):
       self.flist.setCwd( self.flist.getCwd() )
@@ -178,8 +180,9 @@ class FileView(gtk.TreeView, ShortkeyMixin):
       
       if is_dir:
          self.flist.setCwdInto(fname)
-         self.get_selection().select_path(0)
-         self.makeCellVisible(0)
+         if len(self.flist) > 0:
+            self.get_selection().select_path(0)
+            self.makeCellVisible(0)
       else:
          f_ops.execute( self.flist.getItemFullPath(fname) )
       
