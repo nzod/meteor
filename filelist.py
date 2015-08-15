@@ -93,6 +93,7 @@ class FileList(gtk.ListStore):
         lst = os.listdir(self.cwd)
         self.lst_dirs = natural_sort(
             [fn for fn in lst if self.__f_filter(fn, True)])
+        self.lst_dirs.insert(0, '..')
         self.lst_files = natural_sort(
             [fn for fn in lst if self.__f_filter(fn, False)])
 
@@ -125,10 +126,15 @@ class FileList(gtk.ListStore):
         self.emit('cwd-changed', self.cwd)
 
     def setCwdUp(self):
-        return self.setCwd(os.path.split(self.cwd)[0])
+        prev_selname = self.getCwdName()
+        self.setCwd(os.path.split(self.cwd)[0])
+        self.emit('cwd-up', prev_selname)
 
     def setCwdInto(self, dirname):
-        self.setCwd(os.path.join(self.cwd, dirname))
+        if dirname == '..':
+            self.setCwdUp()
+        else:
+            self.setCwd(os.path.join(self.cwd, dirname))
 
     def setCwdHome(self):
         self.setCwd(os.path.expanduser('~'))
@@ -212,6 +218,8 @@ class FileList(gtk.ListStore):
 
 gobject.type_register(FileList)
 gobject.signal_new('cwd-changed', FileList, gobject.SIGNAL_RUN_FIRST,
+                   gobject.TYPE_NONE, (gobject.TYPE_STRING,))
+gobject.signal_new('cwd-up', FileList, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_STRING,))
 gobject.signal_new('file-created', FileList, gobject.SIGNAL_RUN_FIRST,
                    gobject.TYPE_NONE, (gobject.TYPE_STRING,))

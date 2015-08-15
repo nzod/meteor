@@ -88,6 +88,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
 
         #-- model init
         self.flist.connect('cwd-changed', self.onCwdChanged)
+        self.flist.connect('cwd-up', self.onCwdUp)
         self.flist.connect('file-deleted', self.onFileDeleted)
 
     def clear(self):
@@ -116,9 +117,10 @@ class FileView(gtk.TreeView, ShortkeyMixin):
             pass
 
     def onNavUp(self):
-        currname = self.flist.getCwdName()
         self.flist.setCwdUp()
-        i = self.flist.findItemByFname(currname)
+
+    def onCwdUp(self, srcobj, prev_selname):
+        i = self.flist.findItemByFname(prev_selname)
         if i != -1:
             self.get_selection().select_path(i)
             self.makeCellVisible(i)
