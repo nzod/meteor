@@ -15,15 +15,18 @@ class ShortkeyMixin(object):
       
       self.connect('key-press-event', self.on_keypress)
 
-   def bind_shortkey(self, s, func):
-      parts = s.split('+')
-      if len(parts)>1:
-         mod,keyval = parts
-      else:
-         mod = None
-         keyval = parts[0]
-      keyval = gtk.gdk.keyval_from_name(keyval)
-      self.bindings[mod][keyval] = func
+   def bind_shortkey(self, sk, func):
+      if type(sk) is not list:
+         sk = [sk]
+      for shortkey in sk:
+         parts = shortkey.split('+')
+         if len(parts)>1:
+            mod,keyval = parts
+         else:
+            mod = None
+            keyval = parts[0]
+         keyval = gtk.gdk.keyval_from_name(keyval)
+         self.bindings[mod][keyval] = func
 
    def on_keypress(self, widget, data=None):
       mod = None
