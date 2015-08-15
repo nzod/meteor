@@ -24,7 +24,7 @@ class FileViewPane(gtk.EventBox):
       self.box = gtk.VBox()
       self.box.pack_start(self.pathbar, expand=False)
       self.box.pack_start(fileview_container, expand=True)
-      self.box.pack_start(self.editorbar, expand=False)
+      # self.box.pack_start(self.editorbar, expand=False)
       self.add(self.box)
    
    def setActive(self, active):

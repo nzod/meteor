@@ -25,7 +25,7 @@ class MainWin(gtk.Window, ShortkeyMixin):
       self.connect('delete_event', self.delete_event)
       
       #-- main widgets
-      self.filelists = [FileList()]
+      self.filelists = [FileList(), FileList()]
       self.fviews = [FileViewPane(flist) for flist in self.filelists]
       
       #-- layout
