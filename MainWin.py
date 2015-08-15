@@ -48,6 +48,12 @@ class MainWin(gtk.Window, ShortkeyMixin):
          fview.fileview.connect('focus-in-event', self.onFviewFocusIn)
       self.fviews[0].setActive(True)
       
+      #-- restore geom
+      if conf['remember-wingeom'] and conf['wingeom'] is not None:
+         geom = conf['wingeom']
+         self.move(geom[0], geom[1])
+         self.resize(geom[2], geom[3])
+      
       #-- showtime
       self.show_all()
       
@@ -58,6 +64,10 @@ class MainWin(gtk.Window, ShortkeyMixin):
          flist.teardown()
       if conf['remember-paths']:
          conf['saved-paths'] = saved_paths
+      if conf['remember-wingeom']:
+         x,y = self.get_position()
+         w,h = self.get_size()
+         conf['wingeom'] = [x,y,w,h]
       
       conf.write()
       gtk.main_quit()

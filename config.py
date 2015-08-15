@@ -22,6 +22,8 @@ class Config:
       'confirm-deletion': True,
       'remember-paths': True,
       'saved-paths': [],
+      'remember-wingeom': True,
+      'wingeom': None,
       'opener-program': 'xdg-open',
       'pathbar-pos': 'top',
       'k-quit': 'C+q',
