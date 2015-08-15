@@ -27,7 +27,7 @@ class Config:
       'k-quit': 'C+q',
       'k-reload': 'C+r',
       'k-toggle-hidden': 'C+h',
-      'k-nav-up': ['M+Up', 'Backspace'],
+      'k-nav-up': ['M+Up', 'BackSpace'],
       'k-nav-home': 'M+Home',
       'k-file-rename': 'F2',
       'k-file-delete': 'C+k',
