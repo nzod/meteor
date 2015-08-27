@@ -26,7 +26,7 @@ class PathBar(gtk.EventBox):
 
         self.setActive(False)
 
-        self.fview.getFileList().connect('cwd-changed', self.onCwdChanged)
+        self.fview.fileList().connect('cwd-changed', self.onCwdChanged)
 
     def setActive(self, active):
         self.modify_bg(gtk.STATE_NORMAL,

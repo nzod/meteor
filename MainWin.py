@@ -26,6 +26,8 @@ class MainWin(gtk.Window, ShortkeyMixin):
 
         #-- main widgets
         self.filelists = [FileList(), FileList()]
+        self.filelists[0].setOtherFlist(self.filelists[1])
+        self.filelists[1].setOtherFlist(self.filelists[0])
         self.fviews = [FileViewPane(flist) for flist in self.filelists]
 
         #-- layout

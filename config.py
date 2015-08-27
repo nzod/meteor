@@ -36,6 +36,7 @@ class Config:
         'k-file-delete': 'C+k',
         'k-new-file': 'C+n',
         'k-new-dir': 'M+n',
+        'k-target-eq': 'equal',
         'k-mark': 'm',
         'k-mark-all': 'M+m',
         'k-mark-section': 'C+m',

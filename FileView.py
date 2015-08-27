@@ -29,7 +29,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
 
         self.flist = flist
         self.flist.fname_markup_fun = fname_markup
-
+        
         self.set_headers_visible(False)
         self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_NONE)
 
@@ -81,6 +81,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         self.bind_shortkey('Return', self.onItemEnter)
         self.bind_shortkey(conf['k-file-delete'], self.onDoDelete)
         self.bind_shortkey(conf['k-new-file'], self.onDoNewFile)
+        self.bind_shortkey(conf['k-target-eq'], self.onTargetEqual)
         self.bind_shortkey(conf['k-mark'], self.onToggleMark)
         self.bind_shortkey(conf['k-mark-all'], self.onToggleMarkAll)
         self.bind_shortkey(conf['k-mark-section'], self.onMarkSection)
@@ -94,7 +95,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
     def clear(self):
         self.flist.clear()
 
-    def getFileList(self):
+    def fileList(self):
         return self.flist
 
     def getPane(self):
@@ -179,6 +180,9 @@ class FileView(gtk.TreeView, ShortkeyMixin):
 
     def onDoNewFile(self):
         self.parent_pane.showEditor()
+
+    def onTargetEqual(self):
+        self.flist.otherEqual()
 
     def onToggleHidden(self):
         sel = self.get_selection()
