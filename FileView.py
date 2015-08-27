@@ -71,6 +71,8 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         self.modify_base(gtk.STATE_ACTIVE, gtk.gdk.color_parse('#bbb'))
 
         self.marked_names = {}
+        
+        self.get_selection().set_mode(gtk.SELECTION_SINGLE)
 
         #-- hotkeys
         self.bind_shortkey(conf['k-nav-up'], self.onNavUp)
@@ -81,7 +83,6 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         self.bind_shortkey('Return', self.onItemEnter)
         self.bind_shortkey(conf['k-file-delete'], self.onDoDelete)
         self.bind_shortkey(conf['k-new-file'], self.onDoNewFile)
-        self.bind_shortkey(conf['k-target-eq'], self.onTargetEqual)
         self.bind_shortkey(conf['k-mark'], self.onToggleMark)
         self.bind_shortkey(conf['k-mark-all'], self.onToggleMarkAll)
         self.bind_shortkey(conf['k-mark-section'], self.onMarkSection)
@@ -181,9 +182,6 @@ class FileView(gtk.TreeView, ShortkeyMixin):
     def onDoNewFile(self):
         self.parent_pane.showEditor()
 
-    def onTargetEqual(self):
-        self.flist.otherEqual()
-
     def onToggleHidden(self):
         sel = self.get_selection()
         (model, pathlist) = sel.get_selected_rows()
@@ -205,6 +203,38 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         if first_sel is not None:
             self.makeCellVisible(first_sel)
 
+    def getSelectionState(self):
+        # return self.get_selection().get_selected()[1].copy()
+        pass
+        
+    def setSelectionState(self, treeiter):
+        # self.get_selection().select_iter(treeiter)
+        # treeiter.free()
+        pass
+
+    def getMarkState(self):
+        return self.marked_names
+        
+    def setMarkState(self, state):
+        self.flist.rmAllMarks()
+        self.marked_names = state
+        for i, row in enumerate(self.flist):
+            fname = row[1]
+            if fname in self.marked_names:
+                self.flist.addMark(self.flist.get_iter(i))
+        
+    def getState(self):
+        return {
+            'cwd': self.flist.getCwd(),
+            'marking': self.getMarkState(),
+            'selection': self.getSelectionState()
+        }
+        
+    def setState(self, state):
+        self.flist.setCwd(state['cwd'])
+        self.setMarkState(state['marking'])
+        self.setSelectionState(state['selection'])
+        
     def onToggleMark(self):
         (model, i) = self.get_selection().get_selected()
         if i is None:

@@ -37,6 +37,7 @@ class Config:
         'k-new-file': 'C+n',
         'k-new-dir': 'M+n',
         'k-target-eq': 'equal',
+        'k-target-swap': 'C+s',
         'k-mark': 'm',
         'k-mark-all': 'M+m',
         'k-mark-section': 'C+m',

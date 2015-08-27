@@ -29,8 +29,6 @@ class FileList(gtk.ListStore):
         gtk.ListStore.__init__(self, bool, str, str, str)
         # is_dir, fname, fname_markup, marktxt
 
-        self.other_flist = None
-
         self.use_hidden_files = False
         self.cwd = ''
 
@@ -53,15 +51,6 @@ class FileList(gtk.ListStore):
             '-': self.mod_DeleteFile
         }
         self.mod_q_timer = None
-
-    def setOtherFlist(self, flist):
-        self.other_flist = flist
-        
-    def otherFlist(self):
-        return self.other_flist
-        
-    def otherEqual(self):
-        self.other_flist.setCwd(self.getCwd())
 
     def teardown(self):
         self.watch_notifier.stop()

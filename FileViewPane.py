@@ -4,7 +4,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 
-from FileView import FileView
+from PairedFileView import PairedFileView
 from PathBar import PathBar
 from EditorBar import EditorBar
 
@@ -14,7 +14,7 @@ class FileViewPane(gtk.EventBox):
     def __init__(self, flist):
         gtk.EventBox.__init__(self)
 
-        self.fileview = FileView(flist, self)
+        self.fileview = PairedFileView(flist, self)
         fileview_container = gtk.ScrolledWindow()
         fileview_container.add(self.fileview)
         fileview_container.set_policy(
@@ -28,6 +28,9 @@ class FileViewPane(gtk.EventBox):
         self.box.pack_start(fileview_container, expand=True)
         # self.box.pack_start(self.editorbar, expand=False)
         self.add(self.box)
+
+    def getView(self):
+        return self.fileview
 
     def setActive(self, active):
         self.pathbar.setActive(active)
