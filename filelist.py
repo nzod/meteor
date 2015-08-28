@@ -101,7 +101,8 @@ class FileList(gtk.ListStore):
             
         self.lst_dirs = natural_sort(
             [fn for fn in lst if self.__f_filter(target_path, fn, True)])
-        self.lst_dirs.insert(0, '..')
+        if target_path != '/':
+            self.lst_dirs.insert(0, '..')
         self.lst_files = natural_sort(
             [fn for fn in lst if self.__f_filter(target_path, fn, False)])
 
