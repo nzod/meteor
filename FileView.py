@@ -57,8 +57,8 @@ class FileView(gtk.TreeView, ShortkeyMixin):
             GtkTreeView::allow-rules = 1
         }
         style "filelist-style-inactive"{
-            GtkTreeView::odd-row-color = "#ccc"
-            GtkTreeView::even-row-color = "#ccc"
+            GtkTreeView::odd-row-color = "#ddd"
+            GtkTreeView::even-row-color = "#ddd"
             GtkTreeView::allow-rules = 1
         }
         widget "*filelist_view_active*" style "filelist-style-active"
@@ -66,8 +66,8 @@ class FileView(gtk.TreeView, ShortkeyMixin):
     """)
         self.set_name('filelist_view_inactive')
         self.set_rules_hint(True)
-        self.modify_base(gtk.STATE_SELECTED, gtk.gdk.color_parse('#bbb'))
-        self.modify_base(gtk.STATE_ACTIVE, gtk.gdk.color_parse('#bbb'))
+        self.modify_base(gtk.STATE_SELECTED, gtk.gdk.color_parse('#efefef'))
+        self.modify_base(gtk.STATE_ACTIVE, gtk.gdk.color_parse('#efefef'))
 
         # self.flist.marked_names = {}
         self.alternating_mark_state = True
@@ -103,8 +103,10 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         return self.parent_pane
 
     def setActive(self, active):
-        self.set_name('filelist_view_%s' %
-                      ('active' if active else 'inactive'))
+        self.set_name('filelist_view_%s' % ('active' if active else 'inactive'))
+        sel_color = gtk.gdk.color_parse('#CEB493' if active else '#bbb') #C49E6E
+        self.modify_base(gtk.STATE_SELECTED, sel_color)
+        self.modify_base(gtk.STATE_ACTIVE, sel_color)
 
     def makeCellVisible(self, i):
         self.scroll_to_cell(i)
