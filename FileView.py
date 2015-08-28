@@ -27,6 +27,7 @@ class FileView(gtk.TreeView, ShortkeyMixin):
 
         self.flist = flist
         self.flist.fname_markup_fun = fname_markup
+        self.firstCwdDone = False
         
         self.set_headers_visible(False)
         self.set_grid_lines(gtk.TREE_VIEW_GRID_LINES_NONE)
@@ -110,6 +111,11 @@ class FileView(gtk.TreeView, ShortkeyMixin):
 
     def onCwdChanged(self, srcobj, cwd):
         self.flist.marked_names = {}
+        
+        if not self.firstCwdDone:
+            self.get_selection().select_path(0)
+            self.makeCellVisible(0)
+            self.firstCwdDone = True
 
     def onFileDeleted(self, srcobj, fname):
         try:
