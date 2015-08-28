@@ -125,15 +125,14 @@ class FileList(gtk.ListStore):
         self.loadCwdList()
         self.emit('cwd-changed', self.cwd)
 
-    def setCwd(self, pth):
+    def setCwd(self, pth, follow_watch=True):
         if not os.path.isdir(pth):
             print('FileList: not a directory: ' + pth)
-            return None
+            return False
         cwd = (pth.rstrip('/') if len(pth) > 1 else pth)
         if self.loadCwdList(cwd):
-            if cwd != self.cwd:
-                self.endWatch()
-                self.beginWatch(cwd)
+            if cwd != self.cwd and follow_watch:
+                self.moveWatch(cwd)
             self.cwd = cwd #TODO: make this a property
             self.valid = True
             self.emit('cwd-changed', self.cwd)
@@ -159,7 +158,8 @@ class FileList(gtk.ListStore):
         while True:
             cwd = os.path.split(cwd)[0]
             cwd = (cwd.rstrip('/') if len(cwd) > 1 else cwd)
-            if -1 != self.setCwd(cwd):
+            if self.setCwd(cwd, False):
+                self.moveWatch(cwd)
                 break
 
     def beginWatch(self, pth):
@@ -176,6 +176,10 @@ class FileList(gtk.ListStore):
             self.watch_dd = None
             gobject.source_remove(self.mod_q_timer)
             self.eatModQueue()
+            
+    def moveWatch(self, pth):
+        self.endWatch()
+        self.beginWatch(pth)
 
     def eatModQueue(self, widget=None, data=None):
         while True:
