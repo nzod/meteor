@@ -168,8 +168,8 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         fname = model.get_value(m_iter, 1)
 
         if is_dir:
-            self.flist.setCwdInto(fname)
-            if fname!='..' and len(self.flist) > 0:
+            if self.flist.setCwdInto(fname) and \
+              fname!='..' and len(self.flist) > 0:
                 self.get_selection().select_path(0)
                 self.makeCellVisible(0)
         else:

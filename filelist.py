@@ -29,6 +29,7 @@ class FileList(gtk.ListStore):
         gtk.ListStore.__init__(self, bool, str, str, str)
         # is_dir, fname, fname_markup, marktxt
 
+        self.valid = False
         self.use_hidden_files = False
         self.cwd = ''
 
@@ -52,6 +53,9 @@ class FileList(gtk.ListStore):
             '-': self.mod_DeleteFile
         }
         self.mod_q_timer = None
+
+    def isValid(self):
+        return self.valid
 
     def teardown(self):
         self.watch_notifier.stop()
@@ -81,22 +85,25 @@ class FileList(gtk.ListStore):
         for i in xrange(len(self)):
             self.rmMark(self.get_iter(i))
 
-    def __f_filter(self, fn, is_dir):
+    def __f_filter(self, target_path, fn, is_dir):
         # reads:  self.cwd, self.use_hidden_files
         if fn.startswith('.') and (not self.use_hidden_files):
             return False
-        result = os.path.isdir(os.path.join(self.cwd, fn))
-        if not is_dir:
-            result = not result
-        return result
+        val = os.path.isdir(os.path.join(target_path, fn))
+        return (val if is_dir else (not val))
 
-    def loadCwdList(self):
-        lst = os.listdir(self.cwd)
+    def loadCwdList(self, new_path=None):
+        target_path = (new_path if new_path else self.cwd)
+        try:
+            lst = os.listdir(target_path)
+        except OSError:
+            return False
+            
         self.lst_dirs = natural_sort(
-            [fn for fn in lst if self.__f_filter(fn, True)])
+            [fn for fn in lst if self.__f_filter(target_path, fn, True)])
         self.lst_dirs.insert(0, '..')
         self.lst_files = natural_sort(
-            [fn for fn in lst if self.__f_filter(fn, False)])
+            [fn for fn in lst if self.__f_filter(target_path, fn, False)])
 
         self.clear()
         for fname in self.lst_dirs:
@@ -105,8 +112,12 @@ class FileList(gtk.ListStore):
         for fname in self.lst_files:
             self.append(
                 (False, fname, self.fname_markup_fun(fname, False), FileList.MARK_COLOR))
+            
+        return True
 
     def getItemFullPath(self, fn):
+        if not self.isValid():
+            raise Exception('calling itemFullPath with no cwd')
         return os.path.join(self.cwd, fn)
 
     def setUseHiddenFiles(self, val):
@@ -117,28 +128,31 @@ class FileList(gtk.ListStore):
     def setCwd(self, pth):
         if not os.path.isdir(pth):
             print('FileList: not a directory: ' + pth)
-            return -1
+            return None
         cwd = (pth.rstrip('/') if len(pth) > 1 else pth)
-        if cwd != self.cwd:
-            self.endWatch()
-            self.beginWatch(cwd)
-        self.cwd = cwd
-        self.loadCwdList()
-        self.emit('cwd-changed', self.cwd)
+        if self.loadCwdList(cwd):
+            if cwd != self.cwd:
+                self.endWatch()
+                self.beginWatch(cwd)
+            self.cwd = cwd #TODO: make this a property
+            self.valid = True
+            self.emit('cwd-changed', self.cwd)
+        else:
+            print 'Could not acccess', pth
+        return self.valid
 
     def setCwdUp(self):
         prev_selname = self.getCwdName()
-        self.setCwd(os.path.split(self.cwd)[0])
-        self.emit('cwd-up', prev_selname)
+        if self.setCwd(os.path.split(self.cwd)[0]):
+            self.emit('cwd-up', prev_selname)
+            return True
 
     def setCwdInto(self, dirname):
-        if dirname == '..':
-            self.setCwdUp()
-        else:
-            self.setCwd(os.path.join(self.cwd, dirname))
+        return (self.setCwdUp() if dirname == '..' else \
+                self.setCwd(self.getItemFullPath(dirname)))
 
     def setCwdHome(self):
-        self.setCwd(os.path.expanduser('~'))
+        return self.setCwd(os.path.expanduser('~'))
 
     def onCwdGone(self):
         cwd = self.cwd

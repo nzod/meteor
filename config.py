@@ -38,7 +38,7 @@ class Config:
         'k-new-dir': 'M+n',
         'k-target-eq': 'equal',
         'k-target-swap': 'C+s',
-        'k-mark': 'm',
+        'k-mark': ['m', 'Insert', 'space'],
         'k-mark-all': 'M+m',
         'k-mark-section': 'C+m',
         'k-mark-inverse': 'CM+m'
