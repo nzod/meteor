@@ -101,7 +101,7 @@ class FileList(gtk.ListStore):
         self.clear()
         for fname in self.lst_dirs:
             self.append(
-                (True, '['+fname+']', self.fname_markup_fun(fname, True), FileList.MARK_COLOR))
+                (True, fname, self.fname_markup_fun(fname, True), FileList.MARK_COLOR))
         for fname in self.lst_files:
             self.append(
                 (False, fname, self.fname_markup_fun(fname, False), FileList.MARK_COLOR))
@@ -150,10 +150,10 @@ class FileList(gtk.ListStore):
 
     def beginWatch(self, pth):
         self.watch_dd = self.watch_mgr.add_watch(pth,
-                                                 pyinotify.IN_DELETE | pyinotify.IN_CREATE |
-                                                 pyinotify.IN_MOVED_FROM | pyinotify.IN_MOVED_TO |
-                                                 pyinotify.IN_DELETE_SELF | pyinotify.IN_MOVE_SELF,
-                                                 rec=False)
+                             pyinotify.IN_DELETE | pyinotify.IN_CREATE |
+                             pyinotify.IN_MOVED_FROM | pyinotify.IN_MOVED_TO |
+                             pyinotify.IN_DELETE_SELF | pyinotify.IN_MOVE_SELF,
+                             rec=False)
         self.mod_q_timer = gobject.timeout_add_seconds(2, self.eatModQueue)
 
     def endWatch(self):

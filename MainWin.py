@@ -56,7 +56,7 @@ class MainWin(gtk.Window, ShortkeyMixin):
             self.move(geom[0], geom[1])
             self.resize(geom[2], geom[3])
 
-        #-- showtime
+        #--
         self.show_all()
 
     def onQuit(self):

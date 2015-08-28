@@ -10,13 +10,11 @@ import f_ops
 from config import conf
 
 
-def fname_markup(fname, is_dir, is_marked=True):
-    desc = ('bold' if is_dir else '')
-    desc += ' 10.0'
-    fore = ('#ff0000' if is_marked else '#333')
-    text = glib.markup_escape_text(fname)
+def fname_markup(fname, is_dir, is_marked=False):
     return '<span font_desc="%s" foreground="%s">%s</span>' % (
-                                                desc, fore, text)
+                        ('bold' if is_dir else '') + ' 10.0',
+                        ('#ff0000' if is_marked else '#333'),
+                        glib.markup_escape_text(fname))
 
 
 class FileView(gtk.TreeView, ShortkeyMixin):
@@ -111,7 +109,6 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         self.scroll_to_cell(i)
 
     def onCwdChanged(self, srcobj, cwd):
-        
         self.flist.marked_names = {}
 
     def onFileDeleted(self, srcobj, fname):
