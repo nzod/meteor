@@ -34,6 +34,7 @@ class FileList(gtk.ListStore):
 
         self.lst_dirs = []
         self.lst_files = []
+        self.marked_names = {}
 
         self.name_markup_fun = None  # assigned later by owner list
 
@@ -100,7 +101,7 @@ class FileList(gtk.ListStore):
         self.clear()
         for fname in self.lst_dirs:
             self.append(
-                (True, fname, self.fname_markup_fun(fname, True), FileList.MARK_COLOR))
+                (True, '['+fname+']', self.fname_markup_fun(fname, True), FileList.MARK_COLOR))
         for fname in self.lst_files:
             self.append(
                 (False, fname, self.fname_markup_fun(fname, False), FileList.MARK_COLOR))

@@ -10,13 +10,13 @@ import f_ops
 from config import conf
 
 
-def fname_markup(fname, is_dir):
-    desc = ''
-    if is_dir:
-        desc += 'bold'
+def fname_markup(fname, is_dir, is_marked=True):
+    desc = ('bold' if is_dir else '')
     desc += ' 10.0'
-    return '<span font_desc="%s" foreground="#333">%s</span>' % (
-        desc, glib.markup_escape_text(fname))
+    fore = ('#ff0000' if is_marked else '#333')
+    text = glib.markup_escape_text(fname)
+    return '<span font_desc="%s" foreground="%s">%s</span>' % (
+                                                desc, fore, text)
 
 
 class FileView(gtk.TreeView, ShortkeyMixin):
@@ -70,9 +70,10 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         self.modify_base(gtk.STATE_SELECTED, gtk.gdk.color_parse('#bbb'))
         self.modify_base(gtk.STATE_ACTIVE, gtk.gdk.color_parse('#bbb'))
 
-        self.marked_names = {}
+        # self.flist.marked_names = {}
+        self.alternating_mark_state = True
         
-        self.get_selection().set_mode(gtk.SELECTION_SINGLE)
+        self.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
 
         #-- hotkeys
         self.bind_shortkey(conf['k-nav-up'], self.onNavUp)
@@ -110,11 +111,12 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         self.scroll_to_cell(i)
 
     def onCwdChanged(self, srcobj, cwd):
-        self.marked_names = {}
+        
+        self.flist.marked_names = {}
 
     def onFileDeleted(self, srcobj, fname):
         try:
-            del self.marked_names[fname]
+            del self.flist.marked_names[fname]
         except KeyError:
             pass
 
@@ -170,14 +172,14 @@ class FileView(gtk.TreeView, ShortkeyMixin):
 
         if is_dir:
             self.flist.setCwdInto(fname)
-            if len(self.flist) > 0:
+            if fname!='..' and len(self.flist) > 0:
                 self.get_selection().select_path(0)
                 self.makeCellVisible(0)
         else:
             f_ops.execute(self.flist.getItemFullPath(fname))
 
     def onDoDelete(self):
-        f_ops.delete(self.flist.getCwd(), self.marked_names.keys())
+        f_ops.delete(self.flist.getCwd(), self.flist.marked_names.keys())
 
     def onDoNewFile(self):
         self.parent_pane.showEditor()
@@ -213,14 +215,14 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         pass
 
     def getMarkState(self):
-        return self.marked_names
+        return self.flist.marked_names
         
     def setMarkState(self, state):
         self.flist.rmAllMarks()
-        self.marked_names = state
+        self.flist.marked_names = state
         for i, row in enumerate(self.flist):
             fname = row[1]
-            if fname in self.marked_names:
+            if fname in self.flist.marked_names:
                 self.flist.addMark(self.flist.get_iter(i))
         
     def getState(self):
@@ -236,26 +238,38 @@ class FileView(gtk.TreeView, ShortkeyMixin):
         self.setSelectionState(state['selection'])
         
     def onToggleMark(self):
-        (model, i) = self.get_selection().get_selected()
-        if i is None:
-            return
-        fname = model.get_value(i, 1)
-        if fname in self.marked_names:
-            del self.marked_names[fname]
-            model.rmMark(i)
-        else:
-            self.marked_names[fname] = None
-            model.addMark(i)
+        (model, rows) = self.get_selection().get_selected_rows()
+        n_rows = len(rows)
+        for path in rows:
+            t_iter = model.get_iter(path)
+            fname = model.get_value(t_iter, 1)
+            if n_rows > 1:
+                if self.alternating_mark_state:
+                    self.flist.marked_names[fname] = None
+                    model.addMark(t_iter)
+                else:
+                    if fname in self.flist.marked_names:
+                        del self.flist.marked_names[fname]
+                        model.rmMark(t_iter)
+                self.alternating_mark_state = not self.alternating_mark_state
+            else:
+                if fname in self.flist.marked_names:
+                    del self.flist.marked_names[fname]
+                    model.rmMark(t_iter)
+                else:
+                    self.flist.marked_names[fname] = None
+                    model.addMark(t_iter)
+                self.alternating_mark_state = True
 
     def onToggleMarkAll(self):
-        if len(self.flist) == len(self.marked_names):
+        if len(self.flist) == len(self.flist.marked_names):
             self.flist.rmAllMarks()
-            self.marked_names = {}
+            self.flist.marked_names = {}
         else:
             for i, row in enumerate(self.flist):
                 fname = row[1]
-                if fname not in self.marked_names:
-                    self.marked_names[fname] = None
+                if fname not in self.flist.marked_names:
+                    self.flist.marked_names[fname] = None
                     self.flist.addMark(self.flist.get_iter(i))
 
     def onMarkSection(self):
@@ -267,16 +281,16 @@ class FileView(gtk.TreeView, ShortkeyMixin):
     def onMarkInverse(self):
         for i, row in enumerate(self.flist):
             fname = row[1]
-            if fname in self.marked_names:
-                del self.marked_names[fname]
+            if fname in self.flist.marked_names:
+                del self.flist.marked_names[fname]
                 self.flist.rmMark(self.flist.get_iter(i))
             else:
-                self.marked_names[fname] = None
+                self.flist.marked_names[fname] = None
                 self.flist.addMark(self.flist.get_iter(i))
 
     def anyMarked(self):
-        return bool(self.marked_names)
+        return bool(self.flist.marked_names)
 
     def iterMarked(self):
-        for name in self.marked_names:
+        for name in self.flist.marked_names:
             yield name
